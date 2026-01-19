@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lección I: INTRODUCCIÓN A LIQUIBASE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f8f9fa;
+            --accent-color: #17a2b8;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --liquibase-color: #2962ff;
+        }
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+       
+        .lesson-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+       
+        .lesson-header {
+            background: linear-gradient(135deg, var(--liquibase-color), #448aff);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+       
+        .lesson-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+       
+        .lesson-subtitle {
+            font-size: 1.2em;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+       
+        .lesson-content {
+            padding: 40px;
+        }
+       
+        .learning-objectives {
+            background-color: var(--secondary-color);
+            border-left: 5px solid var(--liquibase-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .learning-objectives h3 {
+            color: var(--liquibase-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+       
+        .learning-objectives ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+       
+        .learning-objectives li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+       
+        .learning-objectives li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+       
+        .concept-section {
+            margin: 40px 0;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+        }
+       
+        .concept-section h3 {
+            color: var(--liquibase-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+       
+        .analogy-container {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            border-left: 5px solid var(--liquibase-color);
+        }
+       
+        .analogy-container h4 {
+            color: var(--liquibase-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+       
+        .analogy-comparison {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 20px;
+        }
+       
+        .analogy-item {
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+       
+        .analogy-icon {
+            font-size: 2.5em;
+            color: var(--liquibase-color);
+            margin-bottom: 15px;
+        }
+       
+        .core-principle {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 4px solid var(--success-color);
+        }
+       
+        .principle-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--success-color);
+            color: white;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+       
+        .workflow-diagram {
+            background: white;
+            padding: 30px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: center;
+        }
+       
+        .workflow-steps {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+       
+        .workflow-step {
+            background: var(--secondary-color);
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 180px;
+            position: relative;
+            text-align: center;
+        }
+       
+        .workflow-step:not(:last-child):after {
+            content: "→";
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-color);
+            font-size: 1.5em;
+        }
+       
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--liquibase-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+       
+        .component-detail {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+       
+        .component-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+       
+        .component-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--liquibase-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+       
+        .code-example {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+       
+        .code-keyword {
+            color: #569cd6;
+        }
+       
+        .code-string {
+            color: #ce9178;
+        }
+       
+        .key-points {
+            background-color: #fff8e1;
+            border-left: 5px solid var(--warning-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .key-points ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+       
+        .key-points li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+       
+        .key-points li:before {
+            content: "★";
+            position: absolute;
+            left: 0;
+            color: var(--warning-color);
+        }
+       
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+       
+        .benefit-card {
+            background: var(--secondary-color);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+       
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+       
+        .benefit-card h4 {
+            color: var(--liquibase-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+       
+        .icon {
+            font-size: 1.5em;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--liquibase-color);
+            color: white;
+        }
+       
+        .challenge-solution {
+            display: flex;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+       
+        .challenge, .solution {
+            flex: 1;
+            min-width: 300px;
+            padding: 25px;
+            border-radius: 8px;
+        }
+       
+        .challenge {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+        }
+       
+        .solution {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+        }
+       
+        .activity {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--accent-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .activity h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+       
+        .resources {
+            background-color: var(--secondary-color);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+       
+        .resources h3 {
+            color: var(--liquibase-color);
+            margin-bottom: 15px;
+        }
+       
+        .resource-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid var(--liquibase-color);
+        }
+       
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+       
+        .btn {
+            padding: 12px 30px;
+            background: var(--liquibase-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+       
+        .btn:hover {
+            background: #0039cb;
+        }
+       
+        .btn-secondary {
+            background: var(--accent-color);
+        }
+       
+        .btn-secondary:hover {
+            background: #138496;
+        }
+       
+        @media (max-width: 768px) {
+            .workflow-step:not(:last-child):after {
+                display: none;
+            }
+           
+            .workflow-steps {
+                flex-direction: column;
+            }
+           
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+           
+            .lesson-title {
+                font-size: 2em;
+            }
+           
+            .lesson-content {
+                padding: 20px;
+            }
+           
+            .challenge-solution {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <h1 class="lesson-title">INTRODUCCIÓN A LIQUIBASE</h1>
+            <p class="lesson-subtitle">El control de versiones para tus bases de datos - Fundamentos y aplicación práctica</p>
+        </header>
+       
+        <main class="lesson-content">
+            <section class="learning-objectives">
+                <h3><i class="fas fa-bullseye"></i> OBJETIVOS DE APRENDIZAJE</h3>
+                <ul>
+                    <li>Comprender qué es Liquibase y por qué es esencial para la gestión moderna de bases de datos</li>
+                    <li>Identificar los problemas que resuelve Liquibase en entornos de desarrollo y producción</li>
+                    <li>Conocer la arquitectura y componentes principales de Liquibase</li>
+                    <li>Entender el flujo de trabajo completo de cambios en base de datos</li>
+                    <li>Reconocer el valor estratégico de implementar Liquibase en nuestra organización</li>
+                </ul>
+            </section>
+           
+            <div class="analogy-container">
+                <h4><i class="fas fa-lightbulb"></i> LA ANALOGÍA CLAVE: GIT PARA BASES DE DATOS</h4>
+                <p>Así como Git revolucionó el control de versiones del código fuente, Liquibase hace lo mismo para las bases de datos. Permite versionar, rastrear y aplicar cambios de manera controlada y reproducible.</p>
+               
+                <div class="analogy-comparison">
+                    <div class="analogy-item">
+                        <div class="analogy-icon"><i class="fab fa-git-alt"></i></div>
+                        <h4>Git (Código Fuente)</h4>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>Commits y branches</li>
+                            <li>Historial completo</li>
+                            <li>Rollback a cualquier versión</li>
+                            <li>Colaboración simultánea</li>
+                        </ul>
+                    </div>
+                   
+                    <div class="analogy-item">
+                        <div class="analogy-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <h4>Liquibase (Base de Datos)</h4>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>Changesets y changelogs</li>
+                            <li>Tracking de cambios DDL/DML</li>
+                            <li>Rollback controlado</li>
+                            <li>Despliegues consistentes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+           
+            <section class="concept-section">
+                <h3>¿QUÉ ES LIQUIBASE Y POR QUÉ LO NECESITAMOS?</h3>
+               
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h4><i class="fas fa-exclamation-triangle"></i> EL PROBLEMA</h4>
+                        <p><strong>Antes de Liquibase:</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Scripts SQL manuales ejecutados directamente en producción</li>
+                            <li>Diferencias entre ambientes (dev/test/prod)</li>
+                            <li>Sin historial de cambios aplicados</li>
+                            <li>Rollbacks complejos y propensos a errores</li>
+                            <li>Dependencia de "la persona que sabe"</li>
+                        </ul>
+                    </div>
+                   
+                    <div class="solution">
+                        <h4><i class="fas fa-check-circle"></i> LA SOLUCIÓN</h4>
+                        <p><strong>Con Liquibase:</strong></p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Cambios versionados en control de fuente</li>
+                            <li>Consistencia garantizada entre ambientes</li>
+                            <li>Historial completo y auditable</li>
+                            <li>Rollback automático y controlado</li>
+                            <li>Proceso estandarizado y repetible</li>
+                        </ul>
+                    </div>
+                </div>
+               
+                <div class="core-principle">
+                    <h4><span class="principle-icon">!</span> PRINCIPIO FUNDAMENTAL</h4>
+                    <p><strong>Liquibase trata los cambios en la base de datos como código</strong>. Cada modificación (CREATE TABLE, ALTER, INSERT, etc.) se convierte en un artefacto versionado que sigue el mismo ciclo de vida que el código de aplicación.</p>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>CÓMO FUNCIONA LIQUIBASE: ARQUITECTURA BÁSICA</h3>
+               
+                <div class="workflow-diagram">
+                    <h4>FLUJO DE TRABAJO FUNDAMENTAL</h4>
+                    <div class="workflow-steps">
+                        <div class="workflow-step">
+                            <div class="step-number">1</div>
+                            <h5>Desarrollo</h5>
+                            <p>Crear changeset SQL</p>
+                        </div>
+                       
+                        <div class="workflow-step">
+                            <div class="step-number">2</div>
+                            <h5>Versionado</h5>
+                            <p>Commit a Git</p>
+                        </div>
+                       
+                        <div class="workflow-step">
+                            <div class="step-number">3</div>
+                            <h5>Validación</h5>
+                            <p>Pipeline CI/CD</p>
+                        </div>
+                       
+                        <div class="workflow-step">
+                            <div class="step-number">4</div>
+                            <h5>Despliegue</h5>
+                            <p>Aplicar cambios</p>
+                        </div>
+                       
+                        <div class="workflow-step">
+                            <div class="step-number">5</div>
+                            <h5>Tracking</h5>
+                            <p>Registro en DATABASECHANGELOG</p>
+                        </div>
+                    </div>
+                </div>
+               
+                <h4>COMPONENTES PRINCIPALES EXPLICADOS</h4>
+               
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-file-code"></i></div>
+                        <div>
+                            <h4>Changelog - El Director de Orquesta</h4>
+                            <p>Archivo maestro que coordina la ejecución</p>
+                        </div>
+                    </div>
+                    <p><strong>Función:</strong> Define el orden de ejecución de todos los changesets. Liquibase comienza siempre leyendo este archivo.</p>
+                    <p><strong>Características:</strong> Puede ser XML, YAML, JSON o SQL. En nuestra organización usamos JSON por su legibilidad y compatibilidad.</p>
+                   
+                    <div class="code-example">
+                        <span class="code-keyword">{</span><br>
+                        &nbsp;&nbsp;<span class="code-string">"databaseChangeLog"</span>: [<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">{</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"include"</span>: <span class="code-keyword">{</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-string">"file"</span>: <span class="code-string">"scripts/tables/create/users.sql"</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">}</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">}</span><br>
+                        &nbsp;&nbsp;]<br>
+                        <span class="code-keyword">}</span>
+                    </div>
+                </div>
+               
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-cubes"></i></div>
+                        <div>
+                            <h4>Changeset - La Unidad Atómica</h4>
+                            <p>Cada cambio individual en la base de datos</p>
+                        </div>
+                    </div>
+                    <p><strong>Función:</strong> Representa una modificación específica (crear tabla, agregar columna, insertar datos, etc.).</p>
+                    <p><strong>Características:</strong> Debe ser idempotente (puede ejecutarse múltiples veces sin error), tener identificador único y autor.</p>
+                   
+                    <div class="code-example">
+                        -- liquibase formatted sql<br>
+                        -- changeset autor:juan.perez id:001-1<br>
+                        -- comment: Crear tabla de usuarios<br><br>
+                        CREATE TABLE IF NOT EXISTS users (<br>
+                        &nbsp;&nbsp;id UUID PRIMARY KEY DEFAULT gen_random_uuid(),<br>
+                        &nbsp;&nbsp;nombre VARCHAR(100) NOT NULL<br>
+                        );
+                    </div>
+                </div>
+               
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-database"></i></div>
+                        <div>
+                            <h4>DATABASECHANGELOG - El Libro de Registro</h4>
+                            <p>Tabla interna que Liquibase crea y mantiene</p>
+                        </div>
+                    </div>
+                    <p><strong>Función:</strong> Rastrea qué changesets han sido aplicados a la base de datos, cuándo y por quién.</p>
+                    <p><strong>Características:</strong> Se crea automáticamente en la primera ejecución. Contiene metadata completa de cada cambio aplicado.</p>
+                   
+                    <p><strong>Estructura típica:</strong> ID, AUTHOR, FILENAME, DATEEXECUTED, ORDEREXECUTED, EXECTYPE, MD5SUM, DESCRIPTION, COMMENTS, TAG, LIQUIBASE</p>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>CARACTERÍSTICAS TÉCNICAS DE LIQUIBASE</h3>
+               
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <h4><i class="fas fa-code-branch"></i> Multiplataforma</h4>
+                        <p>Soporta más de 20 motores de bases de datos diferentes, incluyendo PostgreSQL (compatible con YugabyteDB), MySQL, Oracle, SQL Server, y más.</p>
+                    </div>
+                   
+                    <div class="benefit-card">
+                        <h4><i class="fas fa-language"></i> Multi-formato</h4>
+                        <p>Permite definir cambios en XML, YAML, JSON o SQL puro. Nuestra organización utiliza SQL para mayor claridad y control directo.</p>
+                    </div>
+                   
+                    <div class="benefit-card">
+                        <h4><i class="fas fa-sync-alt"></i> Idempotencia</h4>
+                        <p>Los changesets pueden ejecutarse múltiples veces sin causar errores, gracias a cláusulas como "IF NOT EXISTS" y tracking interno.</p>
+                    </div>
+                   
+                    <div class="benefit-card">
+                        <h4><i class="fas fa-undo"></i> Rollback Avanzado</h4>
+                        <p>Soporta rollbacks automáticos (por cambioset fallido), manuales (a un tag específico) o por fecha/hora.</p>
+                    </div>
+                   
+                    <div class="benefit-card">
+                        <h4><i class="fas fa-project-diagram"></i> Dependencias</h4>
+                        <p>Permite definir relaciones entre changesets (preconditions, contexts, labels) para controlar el orden de ejecución.</p>
+                    </div>
+                   
+                    <div class="benefit-card">
+                        <h4><i class="fas fa-tools"></i> Herramientas Adicionales</h4>
+                        <p>Incluye diff (comparar esquemas), generate-changelog (inferir changesets desde DB existente), validate (validar changelogs).</p>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>FLUJO DE TRABAJO EN NUESTRA ORGANIZACIÓN</h3>
+               
+                <div class="workflow-diagram">
+                    <h4>INTEGRACIÓN CON NUESTRO STACK TECNOLÓGICO</h4>
+                    <div class="workflow-steps">
+                        <div class="workflow-step">
+                            <div class="step-number">1</div>
+                            <h5>GitHub</h5>
+                            <p>Repositorio con estructura estandarizada</p>
+                        </div>
+                       
+                        <div class="workflow-step">
+                            <div class="step-number">2</div>
+                            <h5>Azure DevOps</h5>
+                            <p>Pipeline CI/CD automatizado</p>
+                        </div>
+                       
+                        <div class="workflow-step">
+                            <div class="step-number">3</div>
+                            <h5>YugabyteDB</h5>
+                            <p>Base de datos distribuida</p>
+                        </div>
+                       
+                        <div class="workflow-step">
+                            <div class="step-number">4</div>
+                            <h5>Properties</h5>
+                            <p>Configuración por ambiente</p>
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fab fa-github"></i></div>
+                        <div>
+                            <h4>Estructura de Repositorio</h4>
+                            <p>Organización estandarizada para todos los proyectos</p>
+                        </div>
+                    </div>
+                    <p><strong>Por qué esta estructura:</strong> Facilita la localización de scripts, mantiene consistencia entre proyectos y permite automatización confiable.</p>
+                   
+                    <pre style="background: #f8f9fa; padding: 15px; border-radius: 6px; font-family: monospace; font-size: 12px; margin-top: 15px;">
+mi-proyecto-db/
+├── changelog_master.json          # Punto de entrada
+├── properties/
+│   ├── dev-instance.json         # Config desarrollo
+│   ├── test-instance.json        # Config testing
+│   └── prod-instance.json        # Config producción
+└── scripts/
+    ├── tables/
+    │   ├── create/               # Creaciones
+    │   ├── alter/                # Modificaciones
+    │   └── drop/                 # Eliminaciones
+    ├── views/                    # Vistas
+    ├── functions/                # Funciones
+    └── data/                     # Datos iniciales
+        ├── insert/               # Inserciones
+        └── update/               # Actualizaciones</pre>
+                </div>
+               
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <h4>Particularidades con YugabyteDB</h4>
+                            <p>Adaptaciones para base de datos distribuida</p>
+                        </div>
+                    </div>
+                    <p><strong>Compatibilidad:</strong> YugabyteDB es compatible con PostgreSQL, por lo que Liquibase funciona nativamente.</p>
+                    <p><strong>Consideraciones especiales:</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Uso de <code>gen_random_uuid()</code> en lugar de funciones específicas de otros DBMS</li>
+                        <li>Consideración de distribución en definiciones de PRIMARY KEY</li>
+                        <li>Soporte para particionamiento y sharding automático</li>
+                        <li>Replicación multi-nodo transparente</li>
+                    </ul>
+                </div>
+            </section>
+           
+            <section class="key-points">
+                <h3><i class="fas fa-star"></i> VALOR ESTRATÉGICO PARA LA ORGANIZACIÓN</h3>
+                <p>Más allá de los beneficios técnicos, Liquibase proporciona ventajas estratégicas:</p>
+               
+                <ul>
+                    <li><strong>Governance y Compliance:</strong> Trazabilidad completa para auditorías internas y externas</li>
+                    <li><strong>Independencia tecnológica:</strong> Reducción del "vendor lock-in" mediante scripts portables</li>
+                    <li><strong>Escalabilidad del equipo:</strong> Nuevos miembros pueden entender y contribuir rápidamente</li>
+                    <li><strong>Reducción de riesgos operacionales:</strong> Menos incidentes en producción, menor tiempo de recuperación</li>
+                    <li><strong>Optimización de costos:</strong> Reducción de horas hombre en despliegues y troubleshooting</li>
+                    <li><strong>Aceleración de entregas:</strong> Ciclos más cortos desde desarrollo hasta producción</li>
+                </ul>
+            </section>
+           
+            <section class="activity">
+                <h3><i class="fas fa-brain"></i> EJERCICIO DE REFLEXIÓN</h3>
+                <p><strong>Analiza tu experiencia actual:</strong> ¿Qué procesos manuales o propensos a errores existen actualmente en tu equipo o proyectos relacionados con cambios en base de datos?</p>
+               
+                <div class="challenge-solution" style="margin-top: 20px;">
+                    <div class="challenge" style="flex: 1;">
+                        <h4>Problemas Comunes</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>Scripts SQL ejecutados manualmente</li>
+                            <li>Diferentes versiones entre ambientes</li>
+                            <li>Falta de documentación de cambios</li>
+                            <li>Problemas en rollbacks</li>
+                            <li>Dependencia de conocimientos específicos</li>
+                        </ul>
+                    </div>
+                   
+                    <div class="solution" style="flex: 1;">
+                        <h4>Cómo Liquibase lo Resuelve</h4>
+                        <ul style="margin-left: 20px;">
+                            <li>Despliegues automatizados</li>
+                            <li>Consistencia garantizada</li>
+                            <li>Historial automático</li>
+                            <li>Rollback controlado</li>
+                            <li>Proceso estandarizado</li>
+                        </ul>
+                    </div>
+                </div>
+               
+                <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 6px; border-left: 4px solid var(--accent-color);">
+                    <p><strong>Pregunta para reflexionar:</strong> Si implementáramos Liquibase en tu proyecto actual, ¿qué tipo de incidentes podríamos prevenir? ¿Cuánto tiempo podríamos ahorrar en despliegues y troubleshooting?</p>
+                </div>
+            </section>
+           
+            <section class="resources">
+                <h3><i class="fas fa-book-open"></i> PARA SABER MÁS</h3>
+                <div class="resource-item">
+                    <strong>Documentación Oficial de Liquibase</strong><br>
+                    <small>Guías completas, referencia de comandos y mejores prácticas</small>
+                </div>
+                <div class="resource-item">
+                    <strong>Liquibase en GitHub</strong><br>
+                    <small>Código fuente, issues y discusiones de la comunidad</small>
+                </div>
+                <div class="resource-item">
+                    <strong>YugabyteDB + Liquibase Integration Guide</strong><br>
+                    <small>Configuración específica para nuestro motor de base de datos</small>
+                </div>
+                <div class="resource-item">
+                    <strong>Casos de Éxito en la Organización</strong><br>
+                    <small>Ejemplos reales de proyectos que ya implementan Liquibase</small>
+                </div>
+            </section>
+           
+            <div class="navigation-buttons">
+                <a href="#" class="btn">◀ Curso Anterior</a>
+                <a href="leccion_ii.html" class="btn btn-secondary">Siguiente: GITHUB Y ESTRUCTURA DE CHANGELOGS ▶</a>
+            </div>
+        </main>
+    </div>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efectos hover en tarjetas
+            const benefitCards = document.querySelectorAll('.benefit-card');
+            benefitCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                });
+            });
+           
+            // Efecto en pasos del workflow
+            const workflowSteps = document.querySelectorAll('.workflow-step');
+            workflowSteps.forEach(step => {
+                step.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.backgroundColor = '#e3f2fd';
+                });
+               
+                step.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.backgroundColor = '';
+                });
+            });
+           
+            // Simulación de ejecución de código
+            const codeExamples = document.querySelectorAll('.code-example');
+            codeExamples.forEach(code => {
+                code.addEventListener('dblclick', function() {
+                    const originalText = this.innerHTML;
+                    this.innerHTML = '<span style="color: #6a9955;">// Ejecutando Liquibase...</span>';
+                   
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                    }, 800);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

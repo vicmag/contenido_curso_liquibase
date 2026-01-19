@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lección III: BREVE REPASO DE SQL (DDL Y DML) Y EJECUCIÓN EN UN AMBIENTE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f8f9fa;
+            --accent-color: #17a2b8;
+            --sql-color: #e38c19;
+            --ddl-color: #dc3545;
+            --dml-color: #28a745;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --yugabyte-color: #589cff;
+        }
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+       
+        .lesson-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+       
+        .lesson-header {
+            background: linear-gradient(135deg, var(--sql-color), #f0ad4e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+       
+        .lesson-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+       
+        .lesson-subtitle {
+            font-size: 1.2em;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+       
+        .lesson-content {
+            padding: 40px;
+        }
+       
+        .learning-objectives {
+            background-color: var(--secondary-color);
+            border-left: 5px solid var(--sql-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .learning-objectives h3 {
+            color: var(--sql-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+       
+        .learning-objectives ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+       
+        .learning-objectives li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+       
+        .learning-objectives li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+       
+        .concept-section {
+            margin: 40px 0;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+        }
+       
+        .concept-section h3 {
+            color: var(--sql-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+       
+        .sql-category {
+            display: flex;
+            margin: 30px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+       
+        .sql-category-header {
+            flex: 0 0 250px;
+            padding: 30px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+       
+        .ddl-header {
+            background: linear-gradient(135deg, var(--ddl-color), #e4606d);
+        }
+       
+        .dml-header {
+            background: linear-gradient(135deg, var(--dml-color), #5cd85c);
+        }
+       
+        .sql-category-content {
+            flex: 1;
+            padding: 30px;
+            background: var(--secondary-color);
+        }
+       
+        .sql-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+       
+        .sql-command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+       
+        .sql-command {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--sql-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+       
+        .sql-command:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+       
+        .sql-command.ddl {
+            border-left-color: var(--ddl-color);
+        }
+       
+        .sql-command.dml {
+            border-left-color: var(--dml-color);
+        }
+       
+        .command-name {
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+        }
+       
+        .command-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+       
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 25px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+       
+        .code-comment {
+            color: #6a9955;
+        }
+       
+        .code-keyword {
+            color: #569cd6;
+        }
+       
+        .code-string {
+            color: #ce9178;
+        }
+       
+        .code-function {
+            color: #dcdcaa;
+        }
+       
+        .code-type {
+            color: #4ec9b0;
+        }
+       
+        .example-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px solid var(--border-color);
+        }
+       
+        .example-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+       
+        .example-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-color);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+       
+        .example-tab.active {
+            color: var(--sql-color);
+            border-bottom: 3px solid var(--sql-color);
+        }
+       
+        .example-content {
+            display: none;
+        }
+       
+        .example-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+       
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        .yugabyte-specific {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--yugabyte-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .yugabyte-specific h4 {
+            color: var(--yugabyte-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+       
+        .execution-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 40px 0;
+            position: relative;
+        }
+       
+        .flow-step {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            width: 80%;
+            margin-bottom: 30px;
+            position: relative;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+       
+        .flow-step:not(:last-child):after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 30px;
+            background: var(--accent-color);
+        }
+       
+        .flow-step-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--accent-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+       
+        .environment-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+       
+        .dev-badge {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+       
+        .test-badge {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+       
+        .prod-badge {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+       
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+       
+        .comparison-table th {
+            background: var(--sql-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+       
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+       
+        .comparison-table tr:hover {
+            background-color: #f8f9fa;
+        }
+       
+        .activity {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--accent-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .activity h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+       
+        .resources {
+            background-color: var(--secondary-color);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+       
+        .resources h3 {
+            color: var(--sql-color);
+            margin-bottom: 15px;
+        }
+       
+        .resource-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid var(--sql-color);
+        }
+       
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+       
+        .btn {
+            padding: 12px 30px;
+            background: var(--sql-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+       
+        .btn:hover {
+            background: #c57600;
+        }
+       
+        .btn-secondary {
+            background: var(--accent-color);
+        }
+       
+        .btn-secondary:hover {
+            background: #138496;
+        }
+       
+        .toggle-button {
+            background: var(--sql-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+       
+        .toggle-button:hover {
+            background: #c57600;
+        }
+       
+        .sql-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            display: none;
+        }
+       
+        .sql-output.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+       
+        @media (max-width: 768px) {
+            .sql-category {
+                flex-direction: column;
+            }
+           
+            .sql-category-header {
+                flex: none;
+                padding: 20px;
+            }
+           
+            .flow-step {
+                width: 95%;
+            }
+           
+            .lesson-title {
+                font-size: 2em;
+            }
+           
+            .lesson-content {
+                padding: 20px;
+            }
+           
+            .sql-command-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <h1 class="lesson-title">BREVE REPASO DE SQL (DDL Y DML)</h1>
+            <p class="lesson-subtitle">Y EJECUCIÓN EN UN AMBIENTE</p>
+        </header>
+       
+        <main class="lesson-content">
+            <section class="learning-objectives">
+                <h3><span class="sql-icon"><i class="fas fa-database"></i></span> OBJETIVOS DE APRENDIZAJE</h3>
+                <ul>
+                    <li>Diferenciar entre comandos DDL (Data Definition Language) y DML (Data Manipulation Language)</li>
+                    <li>Conocer los comandos SQL más utilizados en cambiosets de Liquibase</li>
+                    <li>Entender características específicas de SQL para YugabyteDB</li>
+                    <li>Comprender el proceso de ejecución de SQL en diferentes ambientes</li>
+                    <li>Identificar buenas prácticas para SQL en cambiosets</li>
+                    <li>Reconocer el impacto de cada tipo de comando en el despliegue</li>
+                </ul>
+            </section>
+           
+            <section class="concept-section">
+                <h3>DDL VS DML: ¿CUÁL ES LA DIFERENCIA?</h3>
+               
+                <div class="sql-category">
+                    <div class="sql-category-header ddl-header">
+                        <div class="sql-icon"><i class="fas fa-sitemap"></i></div>
+                        <h3>DDL</h3>
+                        <p>Data Definition Language</p>
+                        <p><em>Define la estructura</em></p>
+                    </div>
+                    <div class="sql-category-content">
+                        <p><strong>Comandos que definen la estructura de la base de datos:</strong></p>
+                        <div class="sql-command-grid">
+                            <div class="sql-command ddl">
+                                <div class="command-name">CREATE</div>
+                                <div class="command-desc">Crear objetos (tablas, vistas, índices)</div>
+                            </div>
+                            <div class="sql-command ddl">
+                                <div class="command-name">ALTER</div>
+                                <div class="command-desc">Modificar estructura de objetos existentes</div>
+                            </div>
+                            <div class="sql-command ddl">
+                                <div class="command-name">DROP</div>
+                                <div class="command-desc">Eliminar objetos de la base de datos</div>
+                            </div>
+                            <div class="sql-command ddl">
+                                <div class="command-name">TRUNCATE</div>
+                                <div class="command-desc">Vaciar una tabla manteniendo la estructura</div>
+                            </div>
+                            <div class="sql-command ddl">
+                                <div class="command-name">RENAME</div>
+                                <div class="command-desc">Renombrar objetos</div>
+                            </div>
+                        </div>
+                        <p><strong>Características:</strong> Suelen requerir menos frecuencia de ejecución, tienen mayor impacto, generalmente requieren permisos elevados.</p>
+                    </div>
+                </div>
+               
+                <div class="sql-category">
+                    <div class="sql-category-header dml-header">
+                        <div class="sql-icon"><i class="fas fa-edit"></i></div>
+                        <h3>DML</h3>
+                        <p>Data Manipulation Language</p>
+                        <p><em>Manipula los datos</em></p>
+                    </div>
+                    <div class="sql-category-content">
+                        <p><strong>Comandos que manipulan los datos dentro de las tablas:</strong></p>
+                        <div class="sql-command-grid">
+                            <div class="sql-command dml">
+                                <div class="command-name">INSERT</div>
+                                <div class="command-desc">Agregar nuevos registros a una tabla</div>
+                            </div>
+                            <div class="sql-command dml">
+                                <div class="command-name">UPDATE</div>
+                                <div class="command-desc">Modificar registros existentes</div>
+                            </div>
+                            <div class="sql-command dml">
+                                <div class="command-name">DELETE</div>
+                                <div class="command-desc">Eliminar registros de una tabla</div>
+                            </div>
+                            <div class="sql-command dml">
+                                <div class="command-name">SELECT</div>
+                                <div class="command-desc">Consultar datos (solo lectura)</div>
+                            </div>
+                            <div class="sql-command dml">
+                                <div class="command-name">MERGE</div>
+                                <div class="command-desc">Insertar o actualizar según condición</div>
+                            </div>
+                        </div>
+                        <p><strong>Características:</strong> Se ejecutan con más frecuencia, tienen menor impacto estructural, pueden ser reversibles.</p>
+                    </div>
+                </div>
+               
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Aspecto</th>
+                                <th>DDL</th>
+                                <th>DML</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Propósito</strong></td>
+                                <td>Definir estructura</td>
+                                <td>Manipular datos</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Frecuencia en changesets</strong></td>
+                                <td>Menos frecuente</td>
+                                <td>Más frecuente</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Reversibilidad</strong></td>
+                                <td>Difícil (DROP)</td>
+                                <td>Posible (DELETE/UPDATE)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Impacto en Liquibase</strong></td>
+                                <td>Cambia DATABASECHANGELOG</td>
+                                <td>No afecta tracking</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ejemplo común</strong></td>
+                                <td>CREATE TABLE usuarios</td>
+                                <td>INSERT INTO usuarios VALUES(...)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>EJEMPLOS PRÁCTICOS PARA CHANGESETS</h3>
+               
+                <div class="example-container">
+                    <div class="example-tabs">
+                        <button class="example-tab active" data-example="ddl-example">DDL - CREATE TABLE</button>
+                        <button class="example-tab" data-example="ddl-alter">DDL - ALTER TABLE</button>
+                        <button class="example-tab" data-example="dml-insert">DML - INSERT</button>
+                        <button class="example-tab" data-example="dml-update">DML - UPDATE</button>
+                    </div>
+                   
+                    <div class="example-content active" id="ddl-example">
+                        <div class="code-block">
+                            <span class="code-comment">-- liquibase formatted sql</span><br>
+                            <span class="code-comment">-- changeset autor:maria.gomez id:001-1</span><br>
+                            <span class="code-comment">-- comment: Crear tabla de productos para catálogo</span><br>
+                            <br>
+                            <span class="code-keyword">CREATE TABLE</span> <span class="code-function">IF NOT EXISTS</span> productos (<br>
+                            &nbsp;&nbsp;id <span class="code-keyword">UUID PRIMARY KEY DEFAULT</span> gen_random_uuid(),<br>
+                            &nbsp;&nbsp;codigo <span class="code-keyword">VARCHAR</span>(20) <span class="code-keyword">NOT NULL UNIQUE</span>,<br>
+                            &nbsp;&nbsp;nombre <span class="code-keyword">VARCHAR</span>(100) <span class="code-keyword">NOT NULL</span>,<br>
+                            &nbsp;&nbsp;descripcion <span class="code-keyword">TEXT</span>,<br>
+                            &nbsp;&nbsp;precio <span class="code-keyword">DECIMAL</span>(10,2) <span class="code-keyword">NOT NULL</span>,<br>
+                            &nbsp;&nbsp;stock <span class="code-keyword">INTEGER DEFAULT</span> 0,<br>
+                            &nbsp;&nbsp;activo <span class="code-keyword">BOOLEAN DEFAULT</span> true,<br>
+                            &nbsp;&nbsp;creado_en <span class="code-keyword">TIMESTAMP DEFAULT</span> CURRENT_TIMESTAMP,<br>
+                            &nbsp;&nbsp;actualizado_en <span class="code-keyword">TIMESTAMP DEFAULT</span> CURRENT_TIMESTAMP<br>
+                            );<br>
+                            <br>
+                            <span class="code-comment">-- rollback DROP TABLE IF EXISTS productos;</span>
+                        </div>
+                        <button class="toggle-button" data-output="ddl-output">Ver explicación</button>
+                        <div class="sql-output" id="ddl-output">
+                            <strong>Puntos clave:</strong><br>
+                            1. <code>IF NOT EXISTS</code> hace el script idempotente<br>
+                            2. <code>UUID</code> con <code>gen_random_uuid()</code> es buena práctica en YugabyteDB<br>
+                            3. Se especifican constraints (NOT NULL, UNIQUE)<br>
+                            4. Incluye campos de auditoría (creado_en, actualizado_en)<br>
+                            5. Rollback explícito definido en comentario
+                        </div>
+                    </div>
+                   
+                    <div class="example-content" id="ddl-alter">
+                        <div class="code-block">
+                            <span class="code-comment">-- changeset autor:maria.gomez id:002-1</span><br>
+                            <span class="code-comment">-- comment: Agregar columna categoría a productos</span><br>
+                            <br>
+                            <span class="code-keyword">ALTER TABLE</span> productos<br>
+                            &nbsp;&nbsp;<span class="code-keyword">ADD COLUMN</span> categoria_id <span class="code-keyword">UUID</span>;<br>
+                            <br>
+                            <span class="code-comment">-- rollback ALTER TABLE productos DROP COLUMN categoria_id;</span><br>
+                            <br>
+                            <span class="code-comment">-- changeset autor:maria.gomez id:002-2</span><br>
+                            <span class="code-keyword">ALTER TABLE</span> productos<br>
+                            &nbsp;&nbsp;<span class="code-keyword">ADD CONSTRAINT</span> fk_producto_categoria<br>
+                            &nbsp;&nbsp;<span class="code-keyword">FOREIGN KEY</span> (categoria_id)<br>
+                            &nbsp;&nbsp;<span class="code-keyword">REFERENCES</span> categorias(id);<br>
+                            <br>
+                            <span class="code-comment">-- rollback ALTER TABLE productos DROP CONSTRAINT fk_producto_categoria;</span>
+                        </div>
+                        <button class="toggle-button" data-output="alter-output">Ver explicación</button>
+                        <div class="sql-output" id="alter-output">
+                            <strong>Puntos clave:</strong><br>
+                            1. Se separan cambios en diferentes changesets para granularidad<br>
+                            2. Cada ALTER tiene su propio rollback definido<br>
+                            3. Se agrega columna primero, luego la foreign key<br>
+                            4. Nombrado consistente de constraints (fk_tabla_columna)<br>
+                            5. Orden lógico: estructura antes de relaciones
+                        </div>
+                    </div>
+                   
+                    <div class="example-content" id="dml-insert">
+                        <div class="code-block">
+                            <span class="code-comment">-- changeset autor:carlos.lopez id:003-1</span><br>
+                            <span class="code-comment">-- comment: Insertar categorías iniciales del sistema</span><br>
+                            <br>
+                            <span class="code-keyword">INSERT INTO</span> categorias (id, nombre, descripcion) <span class="code-keyword">VALUES</span><br>
+                            &nbsp;&nbsp;(<span class="code-string">'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'</span>, <span class="code-string">'Electrónica'</span>, <span class="code-string">'Dispositivos electrónicos'</span>),<br>
+                            &nbsp;&nbsp;(<span class="code-string">'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'</span>, <span class="code-string">'Ropa'</span>, <span class="code-string">'Prendas de vestir'</span>),<br>
+                            &nbsp;&nbsp;(<span class="code-string">'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a13'</span>, <span class="code-string">'Hogar'</span>, <span class="code-string">'Artículos para el hogar'</span>)<br>
+                            <span class="code-keyword">ON CONFLICT</span> (id) <span class="code-keyword">DO NOTHING</span>;<br>
+                            <br>
+                            <span class="code-comment">-- rollback DELETE FROM categorias WHERE id IN (</span><br>
+                            <span class="code-comment">--   'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',</span><br>
+                            <span class="code-comment">--   'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12',</span><br>
+                            <span class="code-comment">--   'c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a13'</span><br>
+                            <span class="code-comment">-- );</span>
+                        </div>
+                        <button class="toggle-button" data-output="insert-output">Ver explicación</button>
+                        <div class="sql-output" id="insert-output">
+                            <strong>Puntos clave:</strong><br>
+                            1. <code>ON CONFLICT DO NOTHING</code> hace el INSERT idempotente<br>
+                            2. Se usan UUIDs explícitos para consistencia entre ambientes<br>
+                            3. Inserción múltiple en una sola sentencia para eficiencia<br>
+                            4. Rollback explícito aunque sea DML (buena práctica)<br>
+                            5. Ideal para datos maestros/configuración inicial
+                        </div>
+                    </div>
+                   
+                    <div class="example-content" id="dml-update">
+                        <div class="code-block">
+                            <span class="code-comment">-- changeset autor:ana.martinez id:004-1</span><br>
+                            <span class="code-comment">-- comment: Actualizar precios por ajuste de inflación</span><br>
+                            <br>
+                            <span class="code-keyword">UPDATE</span> productos<br>
+                            <span class="code-keyword">SET</span> precio = precio * 1.05,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;actualizado_en = CURRENT_TIMESTAMP<br>
+                            <span class="code-keyword">WHERE</span> activo = <span class="code-keyword">true</span>;<br>
+                            <br>
+                            <span class="code-comment">-- rollback UPDATE productos SET precio = precio / 1.05</span><br>
+                            <span class="code-comment">-- WHERE activo = true AND actualizado_en >= '2024-01-01';</span>
+                        </div>
+                        <button class="toggle-button" data-output="update-output">Ver explicación</button>
+                        <div class="sql-output" id="update-output">
+                            <strong>Puntos clave:</strong><br>
+                            1. WHERE específico para evitar actualizar todos los registros<br>
+                            2. Se actualiza también el campo de auditoría (actualizado_en)<br>
+                            3. Rollback matemáticamente reversible<br>
+                            4. Condición en rollback más específica para seguridad<br>
+                            5. DML condicional es común en migraciones de datos
+                        </div>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="yugabyte-specific">
+                <h4><i class="fas fa-bolt"></i> CONSIDERACIONES ESPECIALES PARA YUGABYTEDB</h4>
+                <div class="sql-command-grid">
+                    <div class="sql-command" style="border-left-color: var(--yugabyte-color);">
+                        <div class="command-name">gen_random_uuid()</div>
+                        <div class="command-desc">Función nativa para UUIDs en YugabyteDB</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--yugabyte-color);">
+                        <div class="command-name">ON CONFLICT</div>
+                        <div class="command-desc">Manejo de conflictos en INSERTs distribuidos</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--yugabyte-color);">
+                        <div class="command-name">HASH/ASC/DESC</div>
+                        <div class="command-desc">Especificar ordenamiento para distribuir datos</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--yugabyte-color);">
+                        <div class="command-name">SPLIT AT</div>
+                        <div class="command-desc">Particionamiento explícito de tablas</div>
+                    </div>
+                </div>
+               
+                <div class="code-block" style="margin-top: 20px; font-size: 12px;">
+                    <span class="code-comment">-- Ejemplo YugabyteDB: Creación de tabla con particionamiento</span><br>
+                    <span class="code-keyword">CREATE TABLE</span> ventas (<br>
+                    &nbsp;&nbsp;id <span class="code-keyword">UUID DEFAULT</span> gen_random_uuid(),<br>
+                    &nbsp;&nbsp;fecha_venta <span class="code-keyword">DATE NOT NULL</span>,<br>
+                    &nbsp;&nbsp;monto <span class="code-keyword">DECIMAL</span>(12,2),<br>
+                    &nbsp;&nbsp;PRIMARY KEY (id <span class="code-keyword">HASH</span>, fecha_venta <span class="code-keyword">ASC</span>)<br>
+                    ) <span class="code-keyword">SPLIT AT VALUES</span> (<br>
+                    &nbsp;&nbsp;('2024-01-01'),<br>
+                    &nbsp;&nbsp;('2024-07-01')<br>
+                    );
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>EJECUCIÓN EN DIFERENTES AMBIENTES</h3>
+               
+                <div class="execution-flow">
+                    <div class="flow-step">
+                        <div class="flow-step-number">1</div>
+                        <h4>Ambiente de Desarrollo</h4>
+                        <span class="environment-badge dev-badge">DEV</span>
+                        <p><strong>Propósito:</strong> Desarrollo y pruebas iniciales</p>
+                        <p><strong>Características:</strong> Datos sintéticos, reset frecuente, debug habilitado</p>
+                        <p><strong>Ejecución:</strong> Manual desde IDE o línea de comandos</p>
+                        <p><strong>Responsable:</strong> Desarrollador</p>
+                    </div>
+                   
+                    <div class="flow-step">
+                        <div class="flow-step-number">2</div>
+                        <h4>Ambiente de Testing</h4>
+                        <span class="environment-badge test-badge">TEST</span>
+                        <span class="environment-badge test-badge">QA</span>
+                        <p><strong>Propósito:</strong> Pruebas automatizadas y QA</p>
+                        <p><strong>Características:</strong> Datos representativos, versiones estables</p>
+                        <p><strong>Ejecución:</strong> Automática por pipeline de integración</p>
+                        <p><strong>Responsable:</strong> Pipeline CI/CD</p>
+                    </div>
+                   
+                    <div class="flow-step">
+                        <div class="flow-step-number">3</div>
+                        <h4>Ambiente de Producción</h4>
+                        <span class="environment-badge prod-badge">PROD</span>
+                        <p><strong>Propósito:</strong> Sistema en vivo con usuarios reales</p>
+                        <p><strong>Características:</strong> Datos reales, alta disponibilidad, backups</p>
+                        <p><strong>Ejecución:</strong> Automática con aprobación manual</p>
+                        <p><strong>Responsable:</strong> DevOps con validación</p>
+                    </div>
+                </div>
+               
+                <div class="example-container">
+                    <h4>Diferencias en la Ejecución</h4>
+                    <div class="code-block">
+                        <span class="code-comment"># Comando Liquibase para desarrollo (local)</span><br>
+                        liquibase \<br>
+                        &nbsp;&nbsp;--changeLogFile=changelog_master.json \<br>
+                        &nbsp;&nbsp;--url="jdbc:postgresql://localhost:5433/dev_db" \<br>
+                        &nbsp;&nbsp;--username=dev_user \<br>
+                        &nbsp;&nbsp;--password=dev_pass \<br>
+                        &nbsp;&nbsp;update<br>
+                        <br>
+                        <span class="code-comment"># Comando Liquibase para producción (pipeline)</span><br>
+                        liquibase \<br>
+                        &nbsp;&nbsp;--changeLogFile=changelog_master.json \<br>
+                        &nbsp;&nbsp;--url="${PROD_DB_URL}" \<br>
+                        &nbsp;&nbsp;--username="${PROD_DB_USER}" \<br>
+                        &nbsp;&nbsp;--password="${PROD_DB_PASS}" \<br>
+                        &nbsp;&nbsp;--defaultsFile=properties/prod-instance.json \<br>
+                        &nbsp;&nbsp;update
+                    </div>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>BUENAS PRÁCTICAS PARA SQL EN CHANGESETS</h3>
+               
+                <div class="sql-command-grid">
+                    <div class="sql-command" style="border-left-color: var(--success-color);">
+                        <div class="command-name">✔ IDEMPOTENCIA</div>
+                        <div class="command-desc">Usar IF NOT EXISTS, ON CONFLICT DO NOTHING</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--success-color);">
+                        <div class="command-name">✔ ROLLBACK</div>
+                        <div class="command-desc">Siempre incluir comentario de rollback</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--success-color);">
+                        <div class="command-name">✔ GRANULARIDAD</div>
+                        <div class="command-desc">Un changeset por cambio lógico</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--success-color);">
+                        <div class="command-name">✔ VALIDACIÓN</div>
+                        <div class="command-desc">Probar localmente antes de commit</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--warning-color);">
+                        <div class="command-name">⚠ EVITAR DROP</div>
+                        <div class="command-desc">Preferir ALTER sobre DROP TABLE</div>
+                    </div>
+                    <div class="sql-command" style="border-left-color: var(--warning-color);">
+                        <div class="command-name">⚠ TRANSACCIONES</div>
+                        <div class="command-desc">Cada changeset es una transacción</div>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="activity">
+                <h3><i class="fas fa-pencil-alt"></i> ACTIVIDAD PRÁCTICA</h3>
+                <p><strong>Ejercicio:</strong> Identifica qué tipo de comando SQL (DDL/DML) es cada uno y propón un ejemplo para Liquibase:</p>
+               
+                <div class="example-container">
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Agregar una columna "telefono" a la tabla "clientes"</li>
+                        <li>Insertar 3 roles iniciales del sistema: admin, usuario, invitado</li>
+                        <li>Crear un índice en la columna "email" de la tabla "usuarios"</li>
+                        <li>Actualizar el estado de pedidos antiguos a "completado"</li>
+                        <li>Crear una tabla "log_auditoria" para tracking</li>
+                    </ol>
+                </div>
+               
+                <button class="toggle-button" id="activity-solution" style="margin-top: 15px;">Ver Solución</button>
+                <div class="sql-output" id="activity-solution-output">
+                    <strong>Solución:</strong><br>
+                    1. <strong>DDL</strong> - ALTER TABLE clientes ADD COLUMN telefono VARCHAR(15);<br>
+                    2. <strong>DML</strong> - INSERT INTO roles (id, nombre) VALUES (...) ON CONFLICT DO NOTHING;<br>
+                    3. <strong>DDL</strong> - CREATE INDEX idx_usuarios_email ON usuarios(email);<br>
+                    4. <strong>DML</strong> - UPDATE pedidos SET estado='completado' WHERE fecha < '2024-01-01';<br>
+                    5. <strong>DDL</strong> - CREATE TABLE log_auditoria (...);<br><br>
+                    <strong>Recordatorio:</strong> Cada uno sería un changeset separado en Liquibase.
+                </div>
+            </section>
+           
+            <section class="resources">
+                <h3><i class="fas fa-book"></i> RECURSOS ADICIONALES</h3>
+                <div class="resource-item">
+                    <strong>SQL Style Guide de la Organización</strong><br>
+                    <small>Convenciones específicas para escritura de SQL en changesets</small>
+                </div>
+                <div class="resource-item">
+                    <strong>YugabyteDB SQL Reference</strong><br>
+                    <small>Documentación oficial de comandos SQL compatibles</small>
+                </div>
+                <div class="resource-item">
+                    <strong>Cheatsheet DDL/DML</strong><br>
+                    <small>Resumen rápido de comandos SQL más utilizados</small>
+                </div>
+                <div class="resource-item">
+                    <strong>Ejemplos de Changesets Comunes</strong><br>
+                    <small>Repositorio con ejemplos reales implementados</small>
+                </div>
+            </section>
+           
+            <div class="navigation-buttons">
+                <a href="leccion_ii.html" class="btn">◀ Lección II: GITHUB Y CHANGELOGS</a>
+                <a href="leccion_iv.html" class="btn btn-secondary">Siguiente Lección: PIPELINES EN AZURE DEVOPS ▶</a>
+            </div>
+        </main>
+    </div>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sistema de pestañas para ejemplos
+            const exampleTabs = document.querySelectorAll('.example-tab');
+            const exampleContents = document.querySelectorAll('.example-content');
+           
+            exampleTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const exampleId = this.getAttribute('data-example');
+                   
+                    // Remover clase active de todos
+                    exampleTabs.forEach(t => t.classList.remove('active'));
+                    exampleContents.forEach(c => c.classList.remove('active'));
+                   
+                    // Agregar clase active al seleccionado
+                    this.classList.add('active');
+                    document.getElementById(exampleId).classList.add('active');
+                });
+            });
+           
+            // Botones toggle para explicaciones
+            const toggleButtons = document.querySelectorAll('.toggle-button');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const outputId = this.getAttribute('data-output');
+                    const outputElement = document.getElementById(outputId);
+                   
+                    if (outputElement) {
+                        outputElement.classList.toggle('show');
+                        this.textContent = outputElement.classList.contains('show') ?
+                            'Ocultar explicación' : 'Ver explicación';
+                    }
+                });
+            });
+           
+            // Solución de actividad
+            const activitySolutionBtn = document.getElementById('activity-solution');
+            const activitySolutionOutput = document.getElementById('activity-solution-output');
+           
+            if (activitySolutionBtn && activitySolutionOutput) {
+                activitySolutionBtn.addEventListener('click', function() {
+                    activitySolutionOutput.classList.toggle('show');
+                    this.textContent = activitySolutionOutput.classList.contains('show') ?
+                        'Ocultar solución' : 'Ver solución';
+                });
+            }
+           
+            // Efecto hover en comandos SQL
+            const sqlCommands = document.querySelectorAll('.sql-command');
+            sqlCommands.forEach(command => {
+                command.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 6px 12px rgba(0,0,0,0.1)';
+                });
+               
+                command.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                });
+            });
+           
+            // Simular ejecución de código
+            const codeBlocks = document.querySelectorAll('.code-block');
+            codeBlocks.forEach(block => {
+                block.addEventListener('dblclick', function() {
+                    const originalText = this.textContent;
+                    this.innerHTML = '<span style="color: #6a9955;">-- Ejecutando...</span>';
+                   
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

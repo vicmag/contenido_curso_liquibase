@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lección IV: PIPELINES EN AZURE DEVOPS PIPELINES</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --azure-color: #0078d4;
+            --secondary-color: #f8f9fa;
+            --accent-color: #17a2b8;
+            --success-color: #107c10;
+            --warning-color: #ff8c00;
+            --error-color: #d13438;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --stage-color: #2b579a;
+        }
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+       
+        .lesson-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+       
+        .lesson-header {
+            background: linear-gradient(135deg, var(--azure-color), #005a9e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+       
+        .lesson-title {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+       
+        .lesson-subtitle {
+            font-size: 1.2em;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+       
+        .lesson-content {
+            padding: 40px;
+        }
+       
+        .learning-objectives {
+            background-color: var(--secondary-color);
+            border-left: 5px solid var(--azure-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .learning-objectives h3 {
+            color: var(--azure-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+       
+        .learning-objectives ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+       
+        .learning-objectives li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+       
+        .learning-objectives li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+       
+        .concept-section {
+            margin: 40px 0;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+        }
+       
+        .concept-section h3 {
+            color: var(--azure-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+       
+        .pipeline-diagram {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+       
+        .pipeline-stages {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            position: relative;
+        }
+       
+        .stage {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            border-left: 5px solid var(--stage-color);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+       
+        .stage:not(:last-child):after {
+            content: "";
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 40px;
+            background: var(--azure-color);
+            z-index: 1;
+        }
+       
+        .stage-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+       
+        .stage-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--azure-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+       
+        .stage-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--azure-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+       
+        .stage-tasks {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+       
+        .stage-task {
+            margin-bottom: 8px;
+            padding-left: 25px;
+            position: relative;
+        }
+       
+        .stage-task:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--azure-color);
+        }
+       
+        .yaml-example {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 25px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+       
+        .yaml-key {
+            color: #569cd6;
+        }
+       
+        .yaml-string {
+            color: #ce9178;
+        }
+       
+        .yaml-comment {
+            color: #6a9955;
+        }
+       
+        .yaml-number {
+            color: #b5cea8;
+        }
+       
+        .trigger-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+       
+        .trigger-item {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-width: 200px;
+            position: relative;
+        }
+       
+        .trigger-item:not(:last-child):after {
+            content: "→";
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--azure-color);
+            font-size: 1.5em;
+        }
+       
+        .trigger-icon {
+            font-size: 2em;
+            color: var(--azure-color);
+            margin-bottom: 10px;
+        }
+       
+        .variable-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+       
+        .variable-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+       
+        .variable-card h4 {
+            color: var(--azure-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+       
+        .variable-card .var-name {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-size: 0.9em;
+        }
+       
+        .environment-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+       
+        .env-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+       
+        .dev-env {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+       
+        .test-env {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+       
+        .staging-env {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+       
+        .prod-env {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+       
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+       
+        .comparison-table th {
+            background: var(--azure-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+       
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+       
+        .comparison-table tr:hover {
+            background-color: #f8f9fa;
+        }
+       
+        .status-indicators {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+       
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+       
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+       
+        .status-success {
+            background-color: var(--success-color);
+        }
+       
+        .status-warning {
+            background-color: var(--warning-color);
+        }
+       
+        .status-error {
+            background-color: var(--error-color);
+        }
+       
+        .security-note {
+            background-color: #fff8e1;
+            border-left: 5px solid var(--warning-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .activity {
+            background-color: #e8f4fd;
+            border-left: 5px solid var(--accent-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .activity h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+        }
+       
+        .resources {
+            background-color: var(--secondary-color);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+       
+        .resources h3 {
+            color: var(--azure-color);
+            margin-bottom: 15px;
+        }
+       
+        .resource-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid var(--azure-color);
+        }
+       
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+       
+        .btn {
+            padding: 12px 30px;
+            background: var(--azure-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+       
+        .btn:hover {
+            background: #005a9e;
+        }
+       
+        .btn-secondary {
+            background: var(--accent-color);
+        }
+       
+        .btn-secondary:hover {
+            background: #138496;
+        }
+       
+        .toggle-button {
+            background: var(--azure-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+       
+        .toggle-button:hover {
+            background: #005a9e;
+        }
+       
+        .hidden-content {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+       
+        .hidden-content.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+       
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        .task-details {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid var(--azure-color);
+        }
+       
+        @media (max-width: 768px) {
+            .trigger-item:not(:last-child):after {
+                display: none;
+            }
+           
+            .trigger-diagram {
+                flex-direction: column;
+            }
+           
+            .variable-grid {
+                grid-template-columns: 1fr;
+            }
+           
+            .lesson-title {
+                font-size: 2em;
+            }
+           
+            .lesson-content {
+                padding: 20px;
+            }
+           
+            .status-indicators {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <h1 class="lesson-title">PIPELINES EN AZURE DEVOPS</h1>
+            <p class="lesson-subtitle">Automatización de despliegues de base de datos con Liquibase</p>
+        </header>
+       
+        <main class="lesson-content">
+            <section class="learning-objectives">
+                <h3><i class="fab fa-microsoft"></i> OBJETIVOS DE APRENDIZAJE</h3>
+                <ul>
+                    <li>Comprender la arquitectura de pipelines en Azure DevOps para Liquibase</li>
+                    <li>Configurar triggers automáticos basados en cambios en GitHub</li>
+                    <li>Gestionar variables de entorno y secretos por ambiente</li>
+                    <li>Implementar aprobaciones manuales para producción</li>
+                    <li>Monitorear y resolver fallos en la ejecución de pipelines</li>
+                    <li>Configurar notificaciones y alertas automáticas</li>
+                </ul>
+            </section>
+           
+            <section class="concept-section">
+                <h3>ARQUITECTURA DEL PIPELINE DE DESPLIEGUE</h3>
+               
+                <div class="pipeline-diagram">
+                    <div class="pipeline-stages">
+                        <div class="stage">
+                            <div class="stage-number">1</div>
+                            <div class="stage-header">
+                                <div class="stage-icon"><i class="fab fa-github"></i></div>
+                                <div>
+                                    <h4>Source Control (GitHub)</h4>
+                                    <p>Repositorio con changelogs y changesets</p>
+                                </div>
+                            </div>
+                            <div class="stage-tasks">
+                                <div class="stage-task">Trigger en push a main/master</div>
+                                <div class="stage-task">Validación de estructura de archivos</div>
+                                <div class="stage-task">Checkout automático del código</div>
+                            </div>
+                        </div>
+                       
+                        <div class="stage">
+                            <div class="stage-number">2</div>
+                            <div class="stage-header">
+                                <div class="stage-icon"><i class="fas fa-cogs"></i></div>
+                                <div>
+                                    <h4>Build & Validate</h4>
+                                    <p>Validación y preparación de cambios</p>
+                                </div>
+                            </div>
+                            <div class="stage-tasks">
+                                <div class="stage-task">Instalación de Liquibase</div>
+                                <div class="stage-task">Validación sintáctica de JSON/SQL</div>
+                                <div class="stage-task">Pruebas de consistencia</div>
+                                <div class="stage-task">Generación de reportes</div>
+                            </div>
+                        </div>
+                       
+                        <div class="stage">
+                            <div class="stage-number">3</div>
+                            <div class="stage-header">
+                                <div class="stage-icon"><i class="fas fa-vial"></i></div>
+                                <div>
+                                    <h4>Deploy to Test</h4>
+                                    <p>Despliegue automático a ambiente de testing</p>
+                                </div>
+                            </div>
+                            <div class="stage-tasks">
+                                <div class="stage-task">Conexión a YugabyteDB Test</div>
+                                <div class="stage-task">Ejecución de changesets pendientes</div>
+                                <div class="stage-task">Validación de cambios aplicados</div>
+                                <div class="stage-task">Ejecución de pruebas automatizadas</div>
+                            </div>
+                        </div>
+                       
+                        <div class="stage">
+                            <div class="stage-number">4</div>
+                            <div class="stage-header">
+                                <div class="stage-icon"><i class="fas fa-user-check"></i></div>
+                                <div>
+                                    <h4>Approval Gate</h4>
+                                    <p>Aprobación manual para producción</p>
+                                </div>
+                            </div>
+                            <div class="stage-tasks">
+                                <div class="stage-task">Notificación a responsables</div>
+                                <div class="stage-task">Revisión de cambios aplicados en test</div>
+                                <div class="stage-task">Aprobación/rechazo manual</div>
+                            </div>
+                        </div>
+                       
+                        <div class="stage">
+                            <div class="stage-number">5</div>
+                            <div class="stage-header">
+                                <div class="stage-icon"><i class="fas fa-rocket"></i></div>
+                                <div>
+                                    <h4>Deploy to Production</h4>
+                                    <p>Despliegue final a ambiente productivo</p>
+                                </div>
+                            </div>
+                            <div class="stage-tasks">
+                                <div class="stage-task">Conexión a YugabyteDB Prod</div>
+                                <div class="stage-task">Ejecución validada de changesets</div>
+                                <div class="stage-task">Verificación final</div>
+                                <div class="stage-task">Notificación de completado</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
+                <div class="status-indicators">
+                    <div class="status-indicator">
+                        <div class="status-dot status-success"></div>
+                        <span>Automático</span>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot status-warning"></div>
+                        <span>Requiere aprobación</span>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot status-error"></div>
+                        <span>Rollback automático en fallo</span>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>CONFIGURACIÓN YAML DEL PIPELINE</h3>
+               
+                <div class="yaml-example">
+<span class="yaml-comment"># azure-pipelines.yml</span><br>
+<span class="yaml-comment"># Pipeline para despliegue de cambios en base de datos</span><br>
+<br>
+<span class="yaml-key">trigger:</span><br>
+&nbsp;&nbsp;<span class="yaml-key">branches:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">include:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp- <span class="yaml-string">main</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp- <span class="yaml-string">releases/*</span><br>
+&nbsp;&nbsp;<span class="yaml-key">paths:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">include:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp- <span class="yaml-string">scripts/**</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp- <span class="yaml-string">changelog_master.json</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp- <span class="yaml-string">properties/**</span><br>
+<br>
+<span class="yaml-key">variables:</span><br>
+&nbsp;&nbsp;- <span class="yaml-key">group:</span> <span class="yaml-string">'liquibase-global-vars'</span><br>
+&nbsp;&nbsp;- <span class="yaml-key">name:</span> <span class="yaml-string">liquibaseVersion</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">value:</span> <span class="yaml-string">'4.20.0'</span><br>
+<br>
+<span class="yaml-key">stages:</span><br>
+&nbsp;&nbsp;- <span class="yaml-key">stage:</span> <span class="yaml-string">Validate</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">displayName:</span> <span class="yaml-string">'Validar cambios'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">jobs:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="yaml-key">job:</span> <span class="yaml-string">ValidationJob</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">pool:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">vmImage:</span> <span class="yaml-string">'ubuntu-latest'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">steps:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="yaml-key">task:</span> <span class="yaml-string">UsePythonVersion@0</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">inputs:</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">versionSpec:</span> <span class="yaml-string">'3.9'</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- <span class="yaml-key">script:</span> <span class="yaml-string">|</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-comment"># Validar estructura JSON</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;python validate_changelogs.py<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="yaml-key">displayName:</span> <span class="yaml-string">'Validar changelogs'</span>
+                </div>
+               
+                <button class="toggle-button" data-target="full-yaml">Ver YAML completo</button>
+                <div class="hidden-content" id="full-yaml">
+                    <div class="yaml-example">
+<span class="yaml-key">- stage:</span> <span class="yaml-string">DeployToTest</span><br>
+<span class="yaml-key">&nbsp;&nbsp;displayName:</span> <span class="yaml-string">'Desplegar en Test'</span><br>
+<span class="yaml-key">&nbsp;&nbsp;dependsOn:</span> <span class="yaml-string">Validate</span><br>
+<span class="yaml-key">&nbsp;&nbsp;condition:</span> <span class="yaml-string">succeeded()</span><br>
+<span class="yaml-key">&nbsp;&nbsp;jobs:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;- job:</span> <span class="yaml-string">DeployTestJob</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pool:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vmImage:</span> <span class="yaml-string">'ubuntu-latest'</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;steps:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- task:</span> <span class="yaml-string">DownloadSecureFile@1</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name:</span> <span class="yaml-string">liquibaseJar</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inputs:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;secureFile:</span> <span class="yaml-string">'liquibase.jar'</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- script:</span> <span class="yaml-string">|</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;java -jar $(liquibaseJar.secureFilePath) \<br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--defaultsFile=properties/test-instance.json \<br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--changeLogFile=changelog_master.json \<br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;displayName:</span> <span class="yaml-string">'Ejecutar Liquibase en Test'</span><br>
+<br>
+<span class="yaml-key">- stage:</span> <span class="yaml-string">DeployToProd</span><br>
+<span class="yaml-key">&nbsp;&nbsp;displayName:</span> <span class="yaml-string">'Desplegar en Producción'</span><br>
+<span class="yaml-key">&nbsp;&nbsp;dependsOn:</span> <span class="yaml-string">DeployToTest</span><br>
+<span class="yaml-key">&nbsp;&nbsp;condition:</span> <span class="yaml-string">succeeded()</span><br>
+<span class="yaml-key">&nbsp;&nbsp;jobs:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;- deployment:</span> <span class="yaml-string">DeployProd</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;environment:</span> <span class="yaml-string">'yugabyte-prod'</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strategy:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;runOnce:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deploy:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;steps:</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- script:</span> <span class="yaml-string">|</span><br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;java -jar $(liquibaseJar.secureFilePath) \<br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--defaultsFile=properties/prod-instance.json \<br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--changeLogFile=changelog_master.json \<br>
+<span class="yaml-key">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update</span>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>TRIGGERS Y EVENTOS</h3>
+               
+                <div class="trigger-diagram">
+                    <div class="trigger-item">
+                        <div class="trigger-icon"><i class="fas fa-code-branch"></i></div>
+                        <h4>Push a Main</h4>
+                        <p>Cualquier commit en main/master</p>
+                    </div>
+                   
+                    <div class="trigger-item">
+                        <div class="trigger-icon"><i class="fas fa-tag"></i></div>
+                        <h4>Nuevo Tag</h4>
+                        <p>Tags semánticos v1.0.0</p>
+                    </div>
+                   
+                    <div class="trigger-item">
+                        <div class="trigger-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <h4>Programado</h4>
+                        <p>Ejecución diaria/noche</p>
+                    </div>
+                   
+                    <div class="trigger-item">
+                        <div class="trigger-icon"><i class="fas fa-play-circle"></i></div>
+                        <h4>Manual</h4>
+                        <p>Inicio manual por usuario</p>
+                    </div>
+                </div>
+               
+                <div class="task-details">
+                    <strong>Configuración de Path Filters:</strong><br>
+                    El pipeline solo se activa cuando hay cambios en:
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><code>changelog_master.json</code> - Cambios en estructura</li>
+                        <li><code>scripts/**</code> - Nuevos changesets SQL</li>
+                        <li><code>properties/**</code> - Cambios en configuración</li>
+                    </ul>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>GESTIÓN DE VARIABLES Y SECRETOS</h3>
+               
+                <div class="variable-grid">
+                    <div class="variable-card">
+                        <h4><i class="fas fa-key"></i> Variables de Grupo</h4>
+                        <div class="var-name">liquibase-global-vars</div>
+                        <p>Configuración compartida entre pipelines:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>liquibaseVersion: "4.20.0"</li>
+                            <li>jdbcDriver: "org.postgresql.Driver"</li>
+                            <li>logLevel: "INFO"</li>
+                        </ul>
+                    </div>
+                   
+                    <div class="variable-card">
+                        <h4><i class="fas fa-user-secret"></i> Secretos por Ambiente</h4>
+                        <div class="environment-badges">
+                            <span class="env-badge dev-env">DEV</span>
+                            <span class="env-badge test-env">TEST</span>
+                            <span class="env-badge staging-env">STAGING</span>
+                            <span class="env-badge prod-env">PROD</span>
+                        </div>
+                        <p>Credenciales almacenadas en Azure Key Vault:</p>
+                        <div class="var-name">$(DB_PASSWORD)</div>
+                        <div class="var-name">$(API_KEY)</div>
+                        <div class="var-name">$(SSL_CERT)</div>
+                    </div>
+                   
+                    <div class="variable-card">
+                        <h4><i class="fas fa-cog"></i> Variables de Pipeline</h4>
+                        <div class="var-name">$(Build.SourceVersion)</div>
+                        <p>Commit ID que disparó el pipeline</p>
+                        <div class="var-name">$(Build.BuildId)</div>
+                        <p>ID único de ejecución</p>
+                        <div class="var-name">$(System.StageName)</div>
+                        <p>Nombre del stage en ejecución</p>
+                    </div>
+                </div>
+               
+                <div class="security-note">
+                    <h4><i class="fas fa-shield-alt"></i> SEGURIDAD</h4>
+                    <p><strong>Nunca</strong> almacenes credenciales en el código. Usa siempre:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Azure Key Vault para secretos</li>
+                        <li>Variable Groups en Library</li>
+                        <li>Secure Files para certificados</li>
+                        <li>Service Connections para autenticación</li>
+                    </ul>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>APROBACIONES Y GATES</h3>
+               
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Type de Gate</th>
+                                <th>Propósito</th>
+                                <th>Configuración</th>
+                                <th>Ejemplo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Pre-deployment Approval</strong></td>
+                                <td>Aprobación manual antes del despliegue</td>
+                                <td>Usuario/Grupo específico</td>
+                                <td>DBA Senior debe aprobar</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Post-deployment Approval</strong></td>
+                                <td>Validación después del despliegue</td>
+                                <td>Automático o manual</td>
+                                <td>Verificar cambios aplicados</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Function Gate</strong></td>
+                                <td>Validación funcional automática</td>
+                                <td>Script/API validation</td>
+                                <td>Probar conexión a DB</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Schedule Gate</strong></td>
+                                <td>Restricción por horario</td>
+                                <td>Ventana de despliegue</td>
+                                <td>Solo entre 22:00-06:00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+               
+                <div class="task-details">
+                    <strong>Configuración de Aprobaciones en Producción:</strong><br>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Crear Environment "yugabyte-prod" en Azure DevOps</li>
+                        <li>Agregar approvers: DBA Team, DevOps Lead</li>
+                        <li>Configurar timeout: 4 horas (para evitar bloqueos)</li>
+                        <li>Habilitar notificaciones por email y Teams</li>
+                        <li>Requerir al menos 2 aprobaciones</li>
+                    </ol>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>MONITOREO Y RESOLUCIÓN DE PROBLEMAS</h3>
+               
+                <div class="variable-grid">
+                    <div class="variable-card">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Errores Comunes</h4>
+                        <div class="status-indicator" style="margin-bottom: 10px;">
+                            <div class="status-dot status-error"></div>
+                            <span>Connection Failure</span>
+                        </div>
+                        <p>DB no disponible o credenciales inválidas</p>
+                       
+                        <div class="status-indicator" style="margin-bottom: 10px;">
+                            <div class="status-dot status-error"></div>
+                            <span>SQL Syntax Error</span>
+                        </div>
+                        <p>Error en changeset SQL</p>
+                       
+                        <div class="status-indicator" style="margin-bottom: 10px;">
+                            <div class="status-dot status-warning"></div>
+                            <span>Validation Warnings</span>
+                        </div>
+                        <p>Problemas en changelog JSON</p>
+                    </div>
+                   
+                    <div class="variable-card">
+                        <h4><i class="fas fa-search"></i> Herramientas de Debug</h4>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><strong>Pipeline Logs:</strong> Descarga completa de logs</li>
+                            <li><strong>Liquibase Log:</strong> Nivel DEBUG para troubleshooting</li>
+                            <li><strong>YugabyteDB Logs:</strong> Consultar en plataforma</li>
+                            <li><strong>Validation Scripts:</strong> Pre-flight checks</li>
+                            <li><strong>Dry Run:</strong> updateSQL para previsualizar</li>
+                        </ul>
+                    </div>
+                   
+                    <div class="variable-card">
+                        <h4><i class="fas fa-bell"></i> Alertas y Notificaciones</h4>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><strong>Email:</strong> Equipo de base de datos</li>
+                            <li><strong>Microsoft Teams:</strong> Canal #db-deployments</li>
+                            <li><strong>Slack:</strong> Canal de alertas</li>
+                            <li><strong>Azure Monitor:</strong> Métricas y alertas</li>
+                            <li><strong>Webhooks:</strong> Sistemas externos</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="activity">
+                <h3><i class="fas fa-tasks"></i> ACTIVIDAD PRÁCTICA</h3>
+                <p><strong>Escenario:</strong> Necesitas configurar un pipeline para un nuevo proyecto. Identifica qué configuraciones necesitas:</p>
+               
+                <div class="task-details">
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>¿Qué triggers configurarías para desarrollo vs producción?</li>
+                        <li>¿Qué variables necesitarías almacenar en Key Vault?</li>
+                        <li>¿Qué aprobaciones configurarías para producción?</li>
+                        <li>¿Cómo manejarías rollbacks automáticos?</li>
+                        <li>¿Qué notificaciones configurarías para el equipo?</li>
+                    </ol>
+                </div>
+               
+                <button class="toggle-button" id="activity-solution">Ver Solución Sugerida</button>
+                <div class="hidden-content" id="activity-solution-content">
+                    <strong>Solución Sugerida:</strong><br><br>
+                    1. <strong>Triggers:</strong> Push a main para DEV/TEST, solo tags para PROD<br>
+                    2. <strong>Key Vault:</strong> DB passwords, API keys, SSL certificates<br>
+                    3. <strong>Aprobaciones:</strong> DBA Lead + Application Owner<br>
+                    4. <strong>Rollbacks:</strong> Configurar stage de rollback automático en fallo<br>
+                    5. <strong>Notificaciones:</strong> Teams para éxito/error, email para aprobaciones pendientes<br><br>
+                    <strong>Configuración adicional:</strong> Ventana de mantenimiento de 22:00-06:00 para PROD
+                </div>
+            </section>
+           
+            <section class="resources">
+                <h3><i class="fas fa-book"></i> RECURSOS ADICIONALES</h3>
+                <div class="resource-item">
+                    <strong>Azure DevOps Documentation</strong><br>
+                    <small>Guías oficiales de configuración de pipelines YAML</small>
+                </div>
+                <div class="resource-item">
+                    <strong>Liquibase Azure DevOps Task</strong><br>
+                    <small>Extensión oficial de Liquibase para Azure DevOps</small>
+                </div>
+                <div class="resource-item">
+                    <strong>Pipeline Templates Internos</strong><br>
+                    <small>Plantillas reutilizables de la organización</small>
+                </div>
+                <div class="resource-item">
+                    <strong>Security Compliance Checklist</strong><br>
+                    <small>Checklist de seguridad para pipelines de base de datos</small>
+                </div>
+            </section>
+           
+            <div class="navigation-buttons">
+                <a href="leccion_iii.html" class="btn">◀ Lección III: REPASO DE SQL</a>
+                <a href="leccion_v.html" class="btn btn-secondary">Siguiente Lección: PROCESO COMPLETO ▶</a>
+            </div>
+        </main>
+    </div>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle para contenido YAML completo
+            const toggleButtons = document.querySelectorAll('.toggle-button');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target') || 'activity-solution-content';
+                    const targetElement = document.getElementById(targetId);
+                   
+                    if (targetElement) {
+                        targetElement.classList.toggle('show');
+                        this.textContent = targetElement.classList.contains('show') ?
+                            'Ocultar contenido' : (this.getAttribute('data-target') ? 'Ver YAML completo' : 'Ver Solución Sugerida');
+                    }
+                });
+            });
+           
+            // Simulación de etapas del pipeline
+            const stages = document.querySelectorAll('.stage');
+            stages.forEach((stage, index) => {
+                stage.addEventListener('click', function() {
+                    // Resaltar la etapa clickeada
+                    stages.forEach(s => s.style.opacity = '0.7');
+                    this.style.opacity = '1';
+                    this.style.transform = 'scale(1.02)';
+                   
+                    // Mostrar detalles después de 1 segundo
+                    setTimeout(() => {
+                        stages.forEach(s => s.style.opacity = '1');
+                        this.style.transform = 'scale(1)';
+                    }, 1000);
+                });
+            });
+           
+            // Efecto hover en tarjetas de variables
+            const variableCards = document.querySelectorAll('.variable-card');
+            variableCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+                });
+               
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                });
+            });
+           
+            // Simulación de ejecución de pipeline
+            const pipelineDiagram = document.querySelector('.pipeline-diagram');
+            pipelineDiagram.addEventListener('dblclick', function() {
+                const stages = this.querySelectorAll('.stage');
+               
+                // Animación secuencial
+                stages.forEach((stage, index) => {
+                    setTimeout(() => {
+                        stage.style.backgroundColor = '#e8f4fd';
+                        stage.style.borderLeftColor = '#17a2b8';
+                       
+                        // Restaurar después de 1.5 segundos
+                        setTimeout(() => {
+                            stage.style.backgroundColor = '';
+                            stage.style.borderLeftColor = '';
+                        }, 1500);
+                    }, index * 1000);
+                });
+            });
+           
+            // Configuración de solución de actividad
+            const activitySolutionBtn = document.getElementById('activity-solution');
+            if (activitySolutionBtn && !activitySolutionBtn.getAttribute('data-target')) {
+                activitySolutionBtn.setAttribute('data-target', 'activity-solution-content');
+            }
+        });
+    </script>
+</body>
+</html>

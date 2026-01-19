@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anexo: Changesets en Formato JSON</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f8f9fa;
+            --accent-color: #6f42c1;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --json-color: #6f42c1;
+            --sql-color: #28a745;
+        }
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+       
+        .lesson-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+       
+        .lesson-header {
+            background: linear-gradient(135deg, var(--json-color), #8a63d2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+       
+        .lesson-title {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+       
+        .lesson-subtitle {
+            font-size: 1.1em;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+       
+        .lesson-content {
+            padding: 40px;
+        }
+       
+        .learning-objectives {
+            background-color: #f0f0ff;
+            border-left: 5px solid var(--json-color);
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .concept-section {
+            margin: 40px 0;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+        }
+       
+        .concept-section h3 {
+            color: var(--json-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+       
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre;
+            tab-size: 2;
+        }
+       
+        .json-key {
+            color: #9cdcfe;
+        }
+       
+        .json-string {
+            color: #ce9178;
+        }
+       
+        .json-number {
+            color: #b5cea8;
+        }
+       
+        .json-boolean {
+            color: #569cd6;
+        }
+       
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+       
+        .format-card {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+       
+        .format-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+       
+        .format-card.sql {
+            border-top: 5px solid var(--sql-color);
+        }
+       
+        .format-card.json {
+            border-top: 5px solid var(--json-color);
+        }
+       
+        .format-icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+       
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+       
+        .pros {
+            background-color: #d4edda;
+            border-left: 5px solid #28a745;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .cons {
+            background-color: #f8d7da;
+            border-left: 5px solid #dc3545;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .workflow-step {
+            background: #f0f0ff;
+            border-left: 4px solid var(--json-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        .workflow-step-number {
+            display: inline-block;
+            background: var(--json-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+       
+        .example-tabs {
+            margin: 25px 0;
+        }
+       
+        .tab-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+       
+        .tab-button {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-color);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+       
+        .tab-button.active {
+            background: var(--json-color);
+            color: white;
+            border-color: var(--json-color);
+        }
+       
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+       
+        .tab-content.active {
+            display: block;
+        }
+       
+        .command-example {
+            background: #24292e;
+            color: #f0f6fc;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-left: 4px solid var(--json-color);
+        }
+
+        .important-note {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+       
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+       
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+           
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+           
+            .lesson-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <h1 class="lesson-title">Módulo II. Anexo: CHANGESETS EN FORMATO JSON</h1>
+            <p class="lesson-subtitle">Alternativa declarativa a los scripts SQL tradicionales</p>
+        </header>
+       
+        <main class="lesson-content">
+            <section class="learning-objectives">
+                <h3>🎯 OBJETIVOS DE ESTE ANEXO</h3>
+                <ul>
+                    <li>Entender el formato JSON como alternativa a SQL para changesets</li>
+                    <li>Aprender la sintaxis JSON de Liquibase (Liquibase 4.x)</li>
+                    <li>Comparar ventajas y desventajas entre SQL y JSON</li>
+                    <li>Convertir changesets SQL a formato JSON</li>
+                    <li>Decidir cuándo usar cada formato según el proyecto</li>
+                </ul>
+            </section>
+
+            <section class="important-note">
+                <h4>⚠️ IMPORTANTE: LIQUIBASE 4.x</h4>
+                <p>En <strong>Liquibase 4.x</strong>, todos los archivos JSON <strong>DEBEN</strong> contener el nodo <code>"databaseChangeLog"</code> en la raíz, incluso cuando se usan con <code>include</code>.</p>
+                <p><strong>Estructura obligatoria:</strong> <code>{ "databaseChangeLog": [ { "changeSet": {...} } ] }</code></p>
+            </section>
+           
+            <section class="concept-section">
+                <h3>📊 SQL vs JSON: DOS FORMATOS, UN PROPÓSITO</h3>
+               
+                <div class="comparison-grid">
+                    <div class="format-card sql">
+                        <div class="format-icon">🗃️</div>
+                        <h4>FORMATO SQL (Tradicional)</h4>
+                        <p><strong>Ventajas:</strong></p>
+                        <ul>
+                            <li>SQL puro, familiar para desarrolladores</li>
+                            <li>Control total sobre la sintaxis</li>
+                            <li>Fácil de escribir y probar directamente</li>
+                            <li>Ideal para operaciones complejas</li>
+                        </ul>
+                        <p><strong>Desventajas:</strong></p>
+                        <ul>
+                            <li>Menos portable entre bases de datos</li>
+                            <li>Sin validación de sintaxis temprana</li>
+                            <li>Difícil de parsear programáticamente</li>
+                        </ul>
+                    </div>
+                   
+                    <div class="format-card json">
+                        <div class="format-icon">📝</div>
+                        <h4>FORMATO JSON (Declarativo)</h4>
+                        <p><strong>Ventajas:</strong></p>
+                        <ul>
+                            <li>Portable entre diferentes motores de BD</li>
+                            <li>Validación de esquema posible</li>
+                            <li>Fácil de generar/modificar programáticamente</li>
+                            <li>Mejor para CI/CD y automatización</li>
+                        </ul>
+                        <p><strong>Desventajas:</strong></p>
+                        <ul>
+                            <li>Curva de aprendizaje inicial</li>
+                            <li>Menos flexible para SQL complejo</li>
+                            <li>Más verboso para operaciones simples</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>🔄 CONVERSIÓN: DE SQL A JSON (Liquibase 4.x)</h3>
+               
+                <div class="example-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" data-tab="create-table">CREATE TABLE</button>
+                        <button class="tab-button" data-tab="create-index">CREATE INDEX</button>
+                        <button class="tab-button" data-tab="alter-table">ALTER TABLE</button>
+                        <button class="tab-button" data-tab="insert-data">INSERT DATA</button>
+                        <button class="tab-button" data-tab="rename-column">RENAME COLUMN</button>
+                    </div>
+                   
+                    <div class="tab-content active" id="create-table">
+                        <h4>📋 001_create_users_table.sql → JSON equivalente</h4>
+                        
+                        <div class="code-block">-- SQL Original (001_create_users_table.sql)
+-- changeset instructor:demo:001-1
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL
+);
+
+-- changeset instructor:demo:001-2
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_created_at ON users(created_at DESC);
+
+-- changeset instructor:demo:001-3
+ALTER TABLE users ADD CONSTRAINT valid_email 
+CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');</div>
+                       
+                        <h4>📄 001_create_users_table.json</h4>
+                        <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    {
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"001-1"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"instructor:demo"</span>,
+        "<span class="json-key">comment</span>": <span class="json-string">"Crear tabla de usuarios"</span>,
+        "<span class="json-key">changes</span>": [
+          {
+            "<span class="json-key">createTable</span>": {
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">columns</span>": [
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"id"</span>,
+                    "<span class="json-key">type</span>": <span class="json-string">"UUID"</span>,
+                    "<span class="json-key">defaultValueComputed</span>": <span class="json-string">"gen_random_uuid()"</span>,
+                    "<span class="json-key">constraints</span>": {
+                      "<span class="json-key">primaryKey</span>": <span class="json-boolean">true</span>,
+                      "<span class="json-key">nullable</span>": <span class="json-boolean">false</span>
+                    }
+                  }
+                },
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"username"</span>,
+                    "<span class="json-key">type</span>": <span class="json-string">"VARCHAR(50)"</span>,
+                    "<span class="json-key">constraints</span>": {
+                      "<span class="json-key">nullable</span>": <span class="json-boolean">false</span>,
+                      "<span class="json-key">unique</span>": <span class="json-boolean">true</span>
+                    }
+                  }
+                },
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"email"</span>,
+                    "<span class="json-key">type</span>": <span class="json-string">"VARCHAR(100)"</span>,
+                    "<span class="json-key">constraints</span>": {
+                      "<span class="json-key">nullable</span>": <span class="json-boolean">false</span>
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "<span class="json-key">rollback</span>": {
+          "<span class="json-key">dropTable</span>": {
+            "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>
+          }
+        }
+      }
+    },
+    {
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"001-2"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"instructor:demo"</span>,
+        "<span class="json-key">comment</span>": <span class="json-string">"Crear índices en users"</span>,
+        "<span class="json-key">changes</span>": [
+          {
+            "<span class="json-key">createIndex</span>": {
+              "<span class="json-key">indexName</span>": <span class="json-string">"idx_users_email"</span>,
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">columns</span>": [
+                { "<span class="json-key">column</span>": { "<span class="json-key">name</span>": <span class="json-string">"email"</span> } }
+              ]
+            }
+          },
+          {
+            "<span class="json-key">createIndex</span>": {
+              "<span class="json-key">indexName</span>": <span class="json-string">"idx_users_created_at"</span>,
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">columns</span>": [
+                { "<span class="json-key">column</span>": { "<span class="json-key">name</span>": <span class="json-string">"created_at"</span> } }
+              ]
+            }
+          }
+        ],
+        "<span class="json-key">rollback</span>": {
+          "<span class="json-key">dropIndex</span>": {
+            "<span class="json-key">indexName</span>": <span class="json-string">"idx_users_email"</span>,
+            "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>
+          }
+        }
+      }
+    },
+    {
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"001-3"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"instructor:demo"</span>,
+        "<span class="json-key">comment</span>": <span class="json-string">"Agregar constraint de email válido"</span>,
+        "<span class="json-key">changes</span>": [
+          {
+            "<span class="json-key">addCheckConstraint</span>": {
+              "<span class="json-key">constraintName</span>": <span class="json-string">"valid_email"</span>,
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">constraintBody</span>": <span class="json-string">"email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"</span>
+            }
+          }
+        ],
+        "<span class="json-key">rollback</span>": {
+          "<span class="json-key">dropConstraint</span>": {
+            "<span class="json-key">constraintName</span>": <span class="json-string">"valid_email"</span>,
+            "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>
+          }
+        }
+      }
+    }
+  ]
+}</div>
+                    </div>
+                   
+                    <div class="tab-content" id="create-index">
+                        <h4>📋 CREATE INDEX → JSON equivalente</h4>
+                        <div class="code-block">-- SQL Original
+-- changeset instructor:demo:004-5
+CREATE INDEX idx_users_name_email ON users(username, email);
+
+-- rollback DROP INDEX idx_users_name_email;</div>
+                       
+                        <h4>📄 JSON equivalente</h4>
+                        <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    {
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"004-5"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"instructor:demo"</span>,
+        "<span class="json-key">changes</span>": [
+          {
+            "<span class="json-key">createIndex</span>": {
+              "<span class="json-key">indexName</span>": <span class="json-string">"idx_users_name_email"</span>,
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">columns</span>": [
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"username"</span>
+                  }
+                },
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"email"</span>
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "<span class="json-key">rollback</span>": {
+          "<span class="json-key">dropIndex</span>": {
+            "<span class="json-key">indexName</span>": <span class="json-string">"idx_users_name_email"</span>,
+            "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>
+          }
+        }
+      }
+    }
+  ]
+}</div>
+                    </div>
+                   
+                    <div class="tab-content" id="alter-table">
+                        <h4>📋 ALTER TABLE ADD COLUMN → JSON equivalente</h4>
+                        <div class="code-block">-- SQL Original (004_add_phone_column.sql)
+-- changeset instructor:demo:004-1
+ALTER TABLE users ADD COLUMN phone_number VARCHAR(15);
+
+-- rollback ALTER TABLE users DROP COLUMN phone_number;</div>
+                       
+                        <h4>📄 004_add_phone_column.json</h4>
+                        <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    {
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"004-1"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"instructor:demo"</span>,
+        "<span class="json-key">comment</span>": <span class="json-string">"Agregar columna phone_number"</span>,
+        "<span class="json-key">changes</span>": [
+          {
+            "<span class="json-key">addColumn</span>": {
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">columns</span>": [
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"phone_number"</span>,
+                    "<span class="json-key">type</span>": <span class="json-string">"VARCHAR(15)"</span>
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "<span class="json-key">rollback</span>": {
+          "<span class="json-key">dropColumn</span>": {
+            "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+            "<span class="json-key">columnName</span>": <span class="json-string">"phone_number"</span>
+          }
+        }
+      }
+    }
+  ]
+}</div>
+                    </div>
+                   
+                    <div class="tab-content" id="insert-data">
+                        <h4>📋 INSERT DATA → JSON equivalente</h4>
+                        <div class="code-block">-- SQL Original (003_initial_data.sql)
+-- changeset instructor:demo:003-1
+INSERT INTO users (username, email, full_name) VALUES
+('jperez', 'juan.perez@empresa.com', 'Juan Pérez');</div>
+                       
+                        <h4>📄 003_initial_data.json</h4>
+                        <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    {
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"003-1"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"instructor:demo"</span>,
+        "<span class="json-key">comment</span>": <span class="json-string">"Insertar usuario jperez"</span>,
+        "<span class="json-key">changes</span>": [
+          {
+            "<span class="json-key">insert</span>": {
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">columns</span>": [
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"username"</span>,
+                    "<span class="json-key">value</span>": <span class="json-string">"jperez"</span>
+                  }
+                },
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"email"</span>,
+                    "<span class="json-key">value</span>": <span class="json-string">"juan.perez@empresa.com"</span>
+                  }
+                },
+                {
+                  "<span class="json-key">column</span>": {
+                    "<span class="json-key">name</span>": <span class="json-string">"full_name"</span>,
+                    "<span class="json-key">value</span>": <span class="json-string">"Juan Pérez"</span>
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "<span class="json-key">rollback</span>": {
+          "<span class="json-key">delete</span>": {
+            "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+            "<span class="json-key">where</span>": <span class="json-string">"username = 'jperez'"</span>
+          }
+        }
+      }
+    }
+  ]
+}</div>
+                    </div>
+
+                    <div class="tab-content" id="rename-column">
+                        <h4>📋 RENAME COLUMN → JSON equivalente</h4>
+                        <div class="code-block">-- SQL Original (005_rename_full_name.sql)
+-- changeset instructor:demo:005-1
+ALTER TABLE users RENAME COLUMN full_name TO complete_name;
+
+-- rollback ALTER TABLE users RENAME COLUMN complete_name TO full_name;</div>
+                       
+                        <h4>📄 005_rename_full_name.json</h4>
+                        <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    {
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"005-1"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"instructor:demo"</span>,
+        "<span class="json-key">comment</span>": <span class="json-string">"Renombrar columna full_name"</span>,
+        "<span class="json-key">changes</span>": [
+          {
+            "<span class="json-key">renameColumn</span>": {
+              "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+              "<span class="json-key">oldColumnName</span>": <span class="json-string">"full_name"</span>,
+              "<span class="json-key">newColumnName</span>": <span class="json-string">"complete_name"</span>
+            }
+          }
+        ],
+        "<span class="json-key">rollback</span>": {
+          "<span class="json-key">renameColumn</span>": {
+            "<span class="json-key">tableName</span>": <span class="json-string">"users"</span>,
+            "<span class="json-key">oldColumnName</span>": <span class="json-string">"complete_name"</span>,
+            "<span class="json-key">newColumnName</span>": <span class="json-string">"full_name"</span>
+          }
+        }
+      }
+    }
+  ]
+}</div>
+                        <div class="important-note">
+                            <h5>⚠️ IMPORTANTE PARA RENAME COLUMN</h5>
+                            <p><strong>NO incluyas</strong> <code>columnDataType</code> en <code>renameColumn</code> a menos que también quieras cambiar el tipo de dato.</p>
+                            <p><strong>Correcto:</strong> Solo especifica <code>oldColumnName</code> y <code>newColumnName</code>.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>⚙️ ESTRUCTURA DE ARCHIVOS CON JSON</h3>
+               
+                <div class="workflow-step">
+                    <span class="workflow-step-number">1</span>
+                    <strong>Changelog Maestro en JSON</strong>
+                    <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    {
+      "<span class="json-key">include</span>": {
+        "<span class="json-key">file</span>": <span class="json-string">"tables/001_users.json"</span>,
+        "<span class="json-key">relativeToChangelogFile</span>": <span class="json-boolean">true</span>
+      }
+    },
+    {
+      "<span class="json-key">include</span>": {
+        "<span class="json-key">file</span>": <span class="json-string">"tables/002_products.json"</span>,
+        "<span class="json-key">relativeToChangelogFile</span>": <span class="json-boolean">true</span>
+      }
+    },
+    {
+      "<span class="json-key">include</span>": {
+        "<span class="json-key">file</span>": <span class="json-string">"data/003_initial_data.json"</span>,
+        "<span class="json-key">relativeToChangelogFile</span>": <span class="json-boolean">true</span>
+      }
+    }
+  ]
+}</div>
+                </div>
+               
+                <div class="workflow-step">
+                    <span class="workflow-step-number">2</span>
+                    <strong>Estructura de Carpetas Mixta</strong>
+                    <div class="code-block">liquibase-project/
+├── changelog-master.json           # Punto de entrada
+├── tables/
+│   ├── 001_users.sql              # SQL puro (CREATE TABLE)
+│   ├── 002_products.json          # JSON declarativo
+│   └── alter/
+│       ├── 004_add_phone_column.sql     # SQL
+│       └── 005_rename_full_name.json    # JSON
+├── data/
+│   └── 003_initial_data.sql       # SQL para inserts
+└── properties/
+    └── local-dev.properties</div>
+                    <p><strong>Nota:</strong> Puedes mezclar SQL y JSON en el mismo proyecto. Los IDs deben ser únicos globalmente.</p>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>🎯 CUÁNDO USAR JSON vs SQL</h3>
+               
+                <div class="pros-cons">
+                    <div class="pros">
+                        <h4>✅ USA JSON CUANDO:</h4>
+                        <ul>
+                            <li>Trabajas con múltiples motores de BD (PostgreSQL, MySQL, Oracle)</li>
+                            <li>Necesitas generar changesets programáticamente</li>
+                            <li>Tu equipo prefiere configuraciones declarativas</li>
+                            <li>Quieres validación de esquema temprana</li>
+                            <li>Operaciones simples (ADD COLUMN, CREATE INDEX, etc.)</li>
+                        </ul>
+                    </div>
+                   
+                    <div class="cons">
+                        <h4>⚠️ USA SQL CUANDO:</h4>
+                        <ul>
+                            <li>Trabajas con un solo motor de BD</li>
+                            <li>Necesitas SQL complejo o específico del motor</li>
+                            <li>Tu equipo ya conoce bien SQL</li>
+                            <li>Tienes scripts SQL existentes para migrar</li>
+                            <li>Operaciones complejas (procedimientos, triggers, etc.)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>🔧 EJECUCIÓN CON CHANGELOGS JSON</h3>
+               
+                <div class="workflow-step">
+                    <strong>Comandos idénticos a SQL:</strong>
+                    <div class="command-example"># Validación
+liquibase --url="jdbc:postgresql://localhost:5432/liquibase_demo" --username=liquibase_user --password=liquibase_pass --changelog-file=changelog-master.json validate
+
+# Ejecución
+liquibase --url="jdbc:postgresql://localhost:5432/liquibase_demo" --username=liquibase_user --password=liquibase_pass --changelog-file=changelog-master.json update</div>
+                   
+                    <p><strong>Nota:</strong> Liquibase trata igual los changelogs en SQL, JSON, XML o YAML. Solo cambia el formato, no la funcionalidad.</p>
+                </div>
+            </section>
+           
+            <section class="concept-section">
+                <h3>📚 REFERENCIA RÁPIDA - OPERACIONES COMUNES</h3>
+               
+                <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    {
+      // CREATE TABLE
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"001"</span>,
+        "<span class="json-key">author</span>": <span class="json-string">"demo"</span>,
+        "<span class="json-key">changes</span>": [{
+          "<span class="json-key">createTable</span>": { ... }
+        }]
+      }
+    },
+    {
+      // ADD COLUMN
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"002"</span>,
+        "<span class="json-key">changes</span>": [{
+          "<span class="json-key">addColumn</span>": { ... }
+        }]
+      }
+    },
+    {
+      // CREATE INDEX
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"003"</span>,
+        "<span class="json-key">changes</span>": [{
+          "<span class="json-key">createIndex</span>": { ... }
+        }]
+      }
+    },
+    {
+      // RENAME COLUMN
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"004"</span>,
+        "<span class="json-key">changes</span>": [{
+          "<span class="json-key">renameColumn</span>": { ... }
+        }]
+      }
+    },
+    {
+      // INSERT DATA
+      "<span class="json-key">changeSet</span>": {
+        "<span class="json-key">id</span>": <span class="json-string">"005"</span>,
+        "<span class="json-key">changes</span>": [{
+          "<span class="json-key">insert</span>": { ... }
+        }]
+      }
+    }
+  ]
+}</div>
+            </section>
+            <section class="concept-section">
+              <h3>📚 GLOSARIO: PALABRAS CLAVE JSON ↔ SQL</h3>
+              
+              <div class="workflow-step">
+                  <span class="workflow-step-number">📖</span>
+                  <strong>TRADUCCIÓN DE CONCEPTOS SQL A JSON</strong>
+                  <p>Esta tabla te ayuda a entender cómo se traducen los conceptos SQL comunes al formato JSON de Liquibase:</p>
+              </div>
+              
+              <div class="code-block" style="background: #f8f9fa; color: #333; font-family: monospace;">
+          <b>CONSTRAINTS (Restricciones)</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Concepto SQL         │ Palabra clave JSON   │ Ejemplo                     │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ PRIMARY KEY          │ primaryKey: true     │ "constraints": {            │
+          │                      │                      │   "primaryKey": true        │
+          │                      │                      │ }                           │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ NOT NULL             │ nullable: false      │ "constraints": {            │
+          │                      │                      │   "nullable": false         │
+          │                      │                      │ }                           │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ UNIQUE               │ unique: true         │ "constraints": {            │
+          │                      │                      │   "unique": true            │
+          │                      │                      │ }                           │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ FOREIGN KEY          │ references:          │ "constraints": {            │
+          │                      │                      │   "foreignKeyName": "fk_id" │
+          │                      │                      │   "referencedTableName":    │
+          │                      │                      │     "tabla_referencia",     │
+          │                      │                      │   "referencedColumnNames":  │
+          │                      │                      │     "id"                    │
+          │                      │                      │ }                           │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+
+          <b>VALORES POR DEFECTO (Default Values)</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Concepto SQL         │ Palabra clave JSON   │ Ejemplo                     │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ DEFAULT 'valor'      │ defaultValue:        │ "defaultValue": "activo"    │
+          │ (string/valor fijo)  │                      │                             │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ DEFAULT CURRENT_     │ defaultValueComputed:│ "defaultValueComputed":     │
+          │ TIMESTAMP/NOW()      │                      │   "CURRENT_TIMESTAMP"       │
+          │ (funciones BD)       │                      │                             │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ DEFAULT              │ defaultValueComputed:│ "defaultValueComputed":     │
+          │ gen_random_uuid()    │                      │   "gen_random_uuid()"       │
+          │ (funciones PG)       │                      │                             │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+
+          <b>OPERACIONES DE TABLA</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Comando SQL          │ Palabra clave JSON   │ Descripción                 │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CREATE TABLE         │ createTable          │ Crear tabla                 │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ ALTER TABLE ADD COL  │ addColumn            │ Agregar columna             │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ ALTER TABLE DROP COL │ dropColumn           │ Eliminar columna            │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ ALTER TABLE RENAME   │ renameColumn         │ Renombrar columna           │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ ALTER TABLE MODIFY   │ modifyDataType       │ Cambiar tipo de dato        │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+
+          <b>ÍNDICES</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Comando SQL          │ Palabra clave JSON   │ Descripción                 │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CREATE INDEX         │ createIndex          │ Crear índice                │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CREATE UNIQUE INDEX  │ createIndex +        │ Índice único                │
+          │                      │ unique: true         │                             │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ DROP INDEX           │ dropIndex            │ Eliminar índice             │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+
+          <b>OPERACIONES CON DATOS</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Comando SQL          │ Palabra clave JSON   │ Descripción                 │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ INSERT INTO          │ insert               │ Insertar datos              │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ UPDATE               │ update               │ Actualizar datos             │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ DELETE FROM          │ delete               │ Eliminar datos               │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ TRUNCATE TABLE       │ truncate             │ Vaciar tabla                │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+
+          <b>OBJETOS DE BASE DE DATOS AVANZADOS</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Objeto SQL           │ Palabra clave JSON   │ Descripción                 │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CREATE VIEW          │ createView           │ Crear vista                 │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CREATE FUNCTION      │ createProcedure*     │ Crear función/procedimiento │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CREATE SEQUENCE      │ createSequence       │ Crear secuencia             │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CREATE SCHEMA        │ createSchema         │ Crear esquema               │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+          *Nota: En Liquibase, "createProcedure" se usa tanto para funciones como procedimientos.
+
+          <b>CONSTRAINTS ADICIONALES</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Constraint SQL       │ Palabra clave JSON   │ Ejemplo                     │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ CHECK (condición)    │ addCheckConstraint   │ "constraintBody":           │
+          │                      │                      │   "edad >= 18"              │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ DEFAULT (valor)      │ defaultValue         │ "defaultValue": "0"         │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ AUTO INCREMENT       │ autoIncrement: true  │ "autoIncrement": true       │
+          │ (MySQL/Serial PG)    │                      │                             │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+
+          <b>ATRIBUTOS ESPECIALES</b>
+          ┌──────────────────────┬──────────────────────┬─────────────────────────────┐
+          │ Atributo SQL         │ Palabra clave JSON   │ Uso                         │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ COMMENT              │ remarks              │ Comentarios de columna      │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ ON DELETE CASCADE    │ deleteCascade: true  │ FK con eliminación en casc. │
+          ├──────────────────────┼──────────────────────┼─────────────────────────────┤
+          │ ON UPDATE CASCADE    │ updateCascade: true  │ FK con actualización casc.  │
+          └──────────────────────┴──────────────────────┴─────────────────────────────┘
+          </div>
+
+              <div class="workflow-step">
+                  <span class="workflow-step-number">💡</span>
+                  <strong>REGLA MNEMOTÉCNICA IMPORTANTE</strong>
+                  <p><strong>"Value" vs "ValueComputed":</strong></p>
+                  <ul>
+                      <li><code>defaultValue</code> → Para valores <strong>literales</strong> fijos ('activo', 100, '2024-01-01')</li>
+                      <li><code>defaultValueComputed</code> → Para <strong>funciones de base de datos</strong> (NOW(), gen_random_uuid(), CURRENT_TIMESTAMP)</li>
+                  </ul>
+                  
+                  <p><strong>Ejemplos correctos:</strong></p>
+                  <div class="code-block">// ❌ INCORRECTO - función en defaultValue
+          "defaultValue": "CURRENT_TIMESTAMP"
+
+          // ✅ CORRECTO - función en defaultValueComputed  
+          "defaultValueComputed": "CURRENT_TIMESTAMP"
+
+          // ✅ CORRECTO - valor literal en defaultValue
+          "defaultValue": "2024-01-01"
+          "defaultValue": "activo"
+          "defaultValue": 100</div>
+              </div>
+              
+              <div class="workflow-step">
+                  <span class="workflow-step-number">🔍</span>
+                  <strong>CÓMO ENCONTRAR MÁS PALABRAS CLAVE</strong>
+                  
+                  <div class="command-example"># 1. Documentación oficial de Liquibase:
+          https://docs.liquibase.com/change-types/home.html
+
+          # 2. Buscar por operación SQL:
+          # Ej: Buscar "addColumn" para ver todas las opciones de ADD COLUMN
+
+          # 3. Usar --help en Liquibase:
+          liquibase generate-changelog --help
+
+          # 4. Ver ejemplos en GitHub:
+          https://github.com/liquibase/liquibase/tree/master/examples</div>
+                  
+                  <p><strong>Tip:</strong> La mayoría de palabras clave JSON son camelCase versiones de los comandos SQL.</p>
+              </div>
+              
+              <div class="important-note">
+                  <h5>📌 PATRÓN GENERAL DE CONVERSIÓN</h5>
+                  <p>La mayoría de las conversiones siguen este patrón:</p>
+                  <div class="code-block">SQL: CREATE TABLE tabla (columna TIPO CONSTRAINT)
+          JSON: "createTable": {
+            "tableName": "tabla",
+            "columns": [{
+              "column": {
+                "name": "columna",
+                "type": "TIPO",
+                "constraints": { "CONSTRAINT": valor }
+              }
+            }]
+          }
+
+          SQL: ALTER TABLE tabla OPERACIÓN
+          JSON: "OPERACIÓNenCamelCase": {
+            "tableName": "tabla",
+            ...
+          }</div>
+                  <p>Donde <code>OPERACIÓNenCamelCase</code> es la operación SQL en formato camelCase (addColumn, dropColumn, renameColumn, etc.).</p>
+              </div>
+          </section>
+            <section class="concept-section">
+                <h3>🚨 ERRORES COMUNES Y SOLUCIONES</h3>
+                
+                <div class="workflow-step">
+                    <span class="workflow-step-number">1</span>
+                    <strong>Error: "Could not find databaseChangeLog node"</strong>
+                    <p><strong>Causa:</strong> Archivo JSON sin <code>"databaseChangeLog"</code> en la raíz.</p>
+                    <p><strong>Solución:</strong> Asegurar que TODOS los archivos JSON tengan:</p>
+                    <div class="code-block">{
+  "<span class="json-key">databaseChangeLog</span>": [
+    { "<span class="json-key">changeSet</span>": { ... } }
+  ]
+}</div>
+                </div>
+
+                <div class="workflow-step">
+                    <span class="workflow-step-number">2</span>
+                    <strong>Error: "changesets had duplicate identifiers"</strong>
+                    <p><strong>Causa:</strong> IDs duplicados entre archivos SQL y JSON.</p>
+                    <p><strong>Solución:</strong> Usar IDs únicos globales. Verificar con:</p>
+                    <div class="command-example">psql -h localhost -U liquibase_user -d liquibase_demo -c "SELECT id, COUNT(*) FROM databasechangelog GROUP BY id HAVING COUNT(*) > 1;"</div>
+                </div>
+            </section>
+        </main>
+    </div>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sistema de pestañas
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+           
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                   
+                    // Remover clase active de todos
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                   
+                    // Agregar clase active al seleccionado
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+           
+            // Resaltado de sintaxis JSON
+            function highlightJSON(code) {
+                return code
+                    .replace(/(".*?"):/g, '<span class="json-key">$1</span>:')
+                    .replace(/: ("[^"]*")/g, ': <span class="json-string">$1</span>')
+                    .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>')
+                    .replace(/: (\d+)/g, ': <span class="json-number">$1</span>');
+            }
+           
+            // Aplicar resaltado a bloques JSON
+            document.querySelectorAll('.code-block').forEach(block => {
+                const text = block.textContent;
+                if (text.trim().startsWith('{')) {
+                    block.innerHTML = highlightJSON(text);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
