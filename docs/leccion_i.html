@@ -805,6 +805,268 @@ mi-proyecto-db/
                     <p><strong>Pregunta para reflexionar:</strong> Si implementáramos Liquibase en tu proyecto actual, ¿qué tipo de incidentes podríamos prevenir? ¿Cuánto tiempo podríamos ahorrar en despliegues y troubleshooting?</p>
                 </div>
             </section>
+
+            <section class="concept-section">
+                <h3>🔧 INSTALACIÓN Y CONFIGURACIÓN PARA POSTGRESQL</h3>
+                
+                <div class="workflow-diagram">
+                    <h4>PASOS PARA PREPARAR EL ENTORNO</h4>
+                    <div class="workflow-steps">
+                        <div class="workflow-step">
+                            <div class="step-number">1</div>
+                            <h5>Java</h5>
+                            <p>Instalar Java 11+</p>
+                        </div>
+                        
+                        <div class="workflow-step">
+                            <div class="step-number">2</div>
+                            <h5>Liquibase</h5>
+                            <p>Descargar e instalar</p>
+                        </div>
+                        
+                        <div class="workflow-step">
+                            <div class="step-number">3</div>
+                            <h5>PostgreSQL</h5>
+                            <p>Configurar BD y usuario</p>
+                        </div>
+                        
+                        <div class="workflow-step">
+                            <div class="step-number">4</div>
+                            <h5>Driver JDBC</h5>
+                            <p>Descargar PostgreSQL JDBC</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fab fa-java"></i></div>
+                        <div>
+                            <h4>PASO 1: Verificar Java (Requisito)</h4>
+                            <p>Liquibase requiere Java 11 o superior</p>
+                        </div>
+                    </div>
+                    <div class="code-example">
+                        <pre><code><span class="code-keyword"># Verificar versión de Java instalada</span>
+            $ java -version
+
+            <span class="code-keyword"># Si no tienes Java, instalar:</span>
+            <span class="code-keyword"># Ubuntu/Debian:</span>
+            $ sudo apt update
+            $ sudo apt install openjdk-11-jdk
+
+            <span class="code-keyword"># macOS:</span>
+            $ brew install openjdk@11
+
+            <span class="code-keyword"># Windows:</span>
+            Descargar de https://adoptium.net/</code></pre>
+                    </div>
+                </div>
+                
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-download"></i></div>
+                        <div>
+                            <h4>PASO 2: Instalar Liquibase</h4>
+                            <p>Múltiples opciones de instalación disponibles</p>
+                        </div>
+                    </div>
+                    
+                    <div class="challenge-solution" style="margin-top: 15px;">
+                        <div class="challenge" style="flex: 1;">
+                            <h5>Opción A: Descarga Manual (Recomendada para curso)</h5>
+                            <div class="code-example" style="margin: 10px 0;">
+                                <pre><code><span class="code-keyword"># 1. Descargar Liquibase (última versión estable)</span>
+            $ wget https://github.com/liquibase/liquibase/releases/download/v4.24.0/liquibase-4.24.0.tar.gz
+
+            <span class="code-keyword"># 2. Extraer</span>
+            $ tar -xzf liquibase-4.24.0.tar.gz
+
+            <span class="code-keyword"># 3. Agregar al PATH</span>
+            $ echo 'export PATH="$PATH:$HOME/liquibase"' >> ~/.bashrc
+            $ source ~/.bashrc
+
+            <span class="code-keyword"># 4. Verificar instalación</span>
+            $ liquibase --version</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="solution" style="flex: 1;">
+                            <h5>Opción B: Package Managers</h5>
+                            <div class="code-example" style="margin: 10px 0;">
+                                <pre><code><span class="code-keyword"># macOS (Homebrew)</span>
+            $ brew install liquibase
+
+            <span class="code-keyword"># Linux (Snap)</span>
+            $ sudo snap install liquibase
+
+            <span class="code-keyword"># Windows (Chocolatey)</span>
+            > choco install liquibase
+
+            <span class="code-keyword"># Docker (para cualquier sistema)</span>
+            $ docker run --rm -v $(pwd):/liquibase/changelog liquibase/liquibase \
+                --url="jdbc:postgresql://host.docker.internal:5432/mydb" update</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-database"></i></div>
+                        <div>
+                            <h4>PASO 3: Configurar PostgreSQL</h4>
+                            <p>Crear base de datos y usuario para Liquibase</p>
+                        </div>
+                    </div>
+                    
+                    <div class="code-example">
+                        <pre><code><span class="code-keyword"># Conectar como superusuario (postgres)</span>
+            $ sudo -u postgres psql
+
+            <span class="code-keyword"># 1. Crear usuario específico para Liquibase</span>
+            CREATE USER liquibase_user WITH PASSWORD 'liquibase_pass';
+
+            <span class="code-keyword"># 2. Crear base de datos</span>
+            CREATE DATABASE liquibase_demo OWNER liquibase_user;
+
+            <span class="code-keyword"># 3. Conectar a la base de datos</span>
+            \c liquibase_demo
+
+            <span class="code-keyword"># 4. Dar permisos completos al usuario</span>
+            GRANT ALL ON SCHEMA public TO liquibase_user;
+            GRANT ALL ON ALL TABLES IN SCHEMA public TO liquibase_user;
+
+            <span class="code-keyword"># 5. Habilitar extensión UUID si la necesitas</span>
+            CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+            <span class="code-keyword"># 6. Salir</span>
+            \q</code></pre>
+                    </div>
+                    
+                    <div class="key-points" style="margin: 15px 0; padding: 15px;">
+                        <h5>⚠️ IMPORTANTE: Permisos de usuario</h5>
+                        <p>El usuario de Liquibase <strong>DEBE</strong> tener permisos para crear tablas en el schema public. 
+                        Si no, verás el error: <code>permission denied for schema public</code>.</p>
+                    </div>
+                </div>
+                
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-network-wired"></i></div>
+                        <div>
+                            <h4>PASO 4: Driver JDBC de PostgreSQL</h4>
+                            <p>Liquibase necesita el conector para comunicarse con PostgreSQL</p>
+                        </div>
+                    </div>
+                    
+                    <div class="code-example">
+                        <pre><code><span class="code-keyword"># Descargar driver JDBC más reciente</span>
+            $ wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
+
+            <span class="code-keyword"># Opciones para usar el driver:</span>
+
+            <span class="code-keyword"># Opción A: Especificar en comando (recomendada para desarrollo)</span>
+            $ liquibase --classpath=./postgresql-42.7.3.jar \
+                --url="jdbc:postgresql://localhost:5432/liquibase_demo" \
+                --username=liquibase_user \
+                --password=liquibase_pass \
+                --changelog-file=changelog_master.json validate
+
+            <span class="code-keyword"># Opción B: Colocar en carpeta lib/ de Liquibase</span>
+            $ cp postgresql-42.7.3.jar /ruta/a/liquibase/lib/
+
+            <span class="code-keyword"># Opción C: Agregar al classpath del sistema</span>
+            $ export CLASSPATH=$CLASSPATH:$(pwd)/postgresql-42.7.3.jar</code></pre>
+                    </div>
+                </div>
+                
+                <div class="component-detail">
+                    <div class="component-header">
+                        <div class="component-icon"><i class="fas fa-vial"></i></div>
+                        <div>
+                            <h4>PASO 5: Verificar Instalación Completa</h4>
+                            <p>Comprobar que todo funciona correctamente</p>
+                        </div>
+                    </div>
+                    
+                    <div class="code-example">
+                        <pre><code><span class="code-keyword"># 1. Verificar versión de Liquibase</span>
+            $ liquibase --version
+            <span class="code-keyword"># Debería mostrar: Liquibase Version: 4.x.x</span>
+
+            <span class="code-keyword"># 2. Probar conexión a PostgreSQL</span>
+            $ liquibase --url="jdbc:postgresql://localhost:5432/liquibase_demo" \
+                --username=liquibase_user \
+                --password=liquibase_pass \
+                --driver=org.postgresql.Driver \
+                --classpath=./postgresql-42.7.3.jar \
+                --output-file=test_connection.txt status
+
+            <span class="code-keyword"># 3. Verificar que el archivo se creó sin errores</span>
+            $ cat test_connection.txt
+
+            <span class="code-keyword"># 4. Probar con un changelog simple</span>
+            $ cat > test_changelog.json << 'EOF'
+            {
+            "databaseChangeLog": [
+                {
+                "changeSet": {
+                    "id": "test-1",
+                    "author": "test",
+                    "changes": [
+                    {
+                        "sql": {
+                        "sql": "SELECT current_timestamp;"
+                        }
+                    }
+                    ]
+                }
+                }
+            ]
+            }
+            EOF
+
+            $ liquibase --url="jdbc:postgresql://localhost:5432/liquibase_demo" \
+                --username=liquibase_user \
+                --password=liquibase_pass \
+                --changelog-file=test_changelog.json \
+                --classpath=./postgresql-42.7.3.jar \
+                validate</code></pre>
+                    </div>
+                </div>
+                
+                <div class="key-points" style="margin-top: 20px;">
+                    <h4>🚨 SOLUCIÓN DE PROBLEMAS COMUNES</h4>
+                    <ul>
+                        <li><strong>"Class not found: org.postgresql.Driver"</strong> → El driver JDBC no está en el classpath</li>
+                        <li><strong>"Connection refused"</strong> → PostgreSQL no está corriendo o el puerto es incorrecto</li>
+                        <li><strong>"password authentication failed"</strong> → Credenciales incorrectas o usuario no existe</li>
+                        <li><strong>"permission denied for schema public"</strong> → Usuario sin permisos suficientes</li>
+                        <li><strong>"Invalid argument '--changelog-file'"</strong> → En Liquibase 4.x, debes especificar siempre este parámetro</li>
+                    </ul>
+                    
+                    <div class="code-example" style="margin-top: 15px; background: #fff3cd;">
+                        <pre><code><span class="code-keyword"># Comandos de diagnóstico útiles:</span>
+
+            <span class="code-keyword"># Verificar que PostgreSQL está corriendo</span>
+            $ systemctl status postgresql
+            $ sudo lsof -i :5432
+
+            <span class="code-keyword"># Probar conexión con psql</span>
+            $ psql -h localhost -U liquibase_user -d liquibase_demo -W
+
+            <span class="code-keyword"># Ver logs de PostgreSQL</span>
+            $ sudo tail -f /var/log/postgresql/postgresql-14-main.log</code></pre>
+                    </div>
+                </div>
+                
+                <div class="core-principle" style="margin-top: 20px;">
+                    <h4><span class="principle-icon">✓</span> CONFIGURACIÓN LISTA PARA EL CURSO</h4>
+                    <p>Con estos pasos completados, tienes un entorno funcional de Liquibase + PostgreSQL para seguir todas las lecciones del curso.</p>
+                    <p><strong>Nota importante:</strong> En las lecciones usaremos <strong>Liquibase 4.x</strong> con la sintaxis actualizada donde <code>--changelog-file</code> es obligatorio en todos los comandos.</p>
+                </div>
+            </section>
            
             <section class="resources">
                 <h3><i class="fas fa-book-open"></i> PARA SABER MÁS</h3>
@@ -833,268 +1095,7 @@ mi-proyecto-db/
         </main>
     </div>
 
- <!-- NUEVA SECCIÓN: INSTALACIÓN Y CONFIGURACIÓN PARA POSTGRESQL -->
-    <section class="concept-section">
-        <h3>🔧 INSTALACIÓN Y CONFIGURACIÓN PARA POSTGRESQL</h3>
-        
-        <div class="workflow-diagram">
-            <h4>PASOS PARA PREPARAR EL ENTORNO</h4>
-            <div class="workflow-steps">
-                <div class="workflow-step">
-                    <div class="step-number">1</div>
-                    <h5>Java</h5>
-                    <p>Instalar Java 11+</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">2</div>
-                    <h5>Liquibase</h5>
-                    <p>Descargar e instalar</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">3</div>
-                    <h5>PostgreSQL</h5>
-                    <p>Configurar BD y usuario</p>
-                </div>
-                
-                <div class="workflow-step">
-                    <div class="step-number">4</div>
-                    <h5>Driver JDBC</h5>
-                    <p>Descargar PostgreSQL JDBC</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="component-detail">
-            <div class="component-header">
-                <div class="component-icon"><i class="fab fa-java"></i></div>
-                <div>
-                    <h4>PASO 1: Verificar Java (Requisito)</h4>
-                    <p>Liquibase requiere Java 11 o superior</p>
-                </div>
-            </div>
-            <div class="code-example">
-    <span class="code-keyword"># Verificar versión de Java instalada</span>
-    $ java -version
-
-    <span class="code-keyword"># Si no tienes Java, instalar:</span>
-    <span class="code-keyword"># Ubuntu/Debian:</span>
-    $ sudo apt update
-    $ sudo apt install openjdk-11-jdk
-
-    <span class="code-keyword"># macOS:</span>
-    $ brew install openjdk@11
-
-    <span class="code-keyword"># Windows:</span>
-    Descargar de https://adoptium.net/
-            </div>
-        </div>
-        
-        <div class="component-detail">
-            <div class="component-header">
-                <div class="component-icon"><i class="fas fa-download"></i></div>
-                <div>
-                    <h4>PASO 2: Instalar Liquibase</h4>
-                    <p>Múltiples opciones de instalación disponibles</p>
-                </div>
-            </div>
-            
-            <div class="challenge-solution" style="margin-top: 15px;">
-                <div class="challenge" style="flex: 1;">
-                    <h5>Opción A: Descarga Manual (Recomendada para curso)</h5>
-                    <div class="code-example" style="margin: 10px 0;">
-    <span class="code-keyword"># 1. Descargar Liquibase (última versión estable)</span>
-    $ wget https://github.com/liquibase/liquibase/releases/download/v4.24.0/liquibase-4.24.0.tar.gz
-
-    <span class="code-keyword"># 2. Extraer</span>
-    $ tar -xzf liquibase-4.24.0.tar.gz
-
-    <span class="code-keyword"># 3. Agregar al PATH</span>
-    $ echo 'export PATH="$PATH:$HOME/liquibase"' >> ~/.bashrc
-    $ source ~/.bashrc
-
-    <span class="code-keyword"># 4. Verificar instalación</span>
-    $ liquibase --version
-                    </div>
-                </div>
-                
-                <div class="solution" style="flex: 1;">
-                    <h5>Opción B: Package Managers</h5>
-                    <div class="code-example" style="margin: 10px 0;">
-    <span class="code-keyword"># macOS (Homebrew)</span>
-    $ brew install liquibase
-
-    <span class="code-keyword"># Linux (Snap)</span>
-    $ sudo snap install liquibase
-
-    <span class="code-keyword"># Windows (Chocolatey)</span>
-    > choco install liquibase
-
-    <span class="code-keyword"># Docker (para cualquier sistema)</span>
-    $ docker run --rm -v $(pwd):/liquibase/changelog liquibase/liquibase \
-        --url="jdbc:postgresql://host.docker.internal:5432/mydb" update
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="component-detail">
-            <div class="component-header">
-                <div class="component-icon"><i class="fas fa-database"></i></div>
-                <div>
-                    <h4>PASO 3: Configurar PostgreSQL</h4>
-                    <p>Crear base de datos y usuario para Liquibase</p>
-                </div>
-            </div>
-            
-            <div class="code-example">
-    <span class="code-keyword"># Conectar como superusuario (postgres)</span>
-    $ sudo -u postgres psql
-
-    <span class="code-keyword"># 1. Crear usuario específico para Liquibase</span>
-    CREATE USER liquibase_user WITH PASSWORD 'liquibase_pass';
-
-    <span class="code-keyword"># 2. Crear base de datos</span>
-    CREATE DATABASE liquibase_demo OWNER liquibase_user;
-
-    <span class="code-keyword"># 3. Conectar a la base de datos</span>
-    \c liquibase_demo
-
-    <span class="code-keyword"># 4. Dar permisos completos al usuario</span>
-    GRANT ALL ON SCHEMA public TO liquibase_user;
-    GRANT ALL ON ALL TABLES IN SCHEMA public TO liquibase_user;
-
-    <span class="code-keyword"># 5. Habilitar extensión UUID si la necesitas</span>
-    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-    <span class="code-keyword"># 6. Salir</span>
-    \q
-            </div>
-            
-            <div class="key-points" style="margin: 15px 0; padding: 15px;">
-                <h5>⚠️ IMPORTANTE: Permisos de usuario</h5>
-                <p>El usuario de Liquibase <strong>DEBE</strong> tener permisos para crear tablas en el schema public. 
-                Si no, verás el error: <code>permission denied for schema public</code>.</p>
-            </div>
-        </div>
-        
-        <div class="component-detail">
-            <div class="component-header">
-                <div class="component-icon"><i class="fas fa-network-wired"></i></div>
-                <div>
-                    <h4>PASO 4: Driver JDBC de PostgreSQL</h4>
-                    <p>Liquibase necesita el conector para comunicarse con PostgreSQL</p>
-                </div>
-            </div>
-            
-            <div class="code-example">
-    <span class="code-keyword"># Descargar driver JDBC más reciente</span>
-    $ wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
-
-    <span class="code-keyword"># Opciones para usar el driver:</span>
-
-    <span class="code-keyword"># Opción A: Especificar en comando (recomendada para desarrollo)</span>
-    $ liquibase --classpath=./postgresql-42.7.3.jar \
-        --url="jdbc:postgresql://localhost:5432/liquibase_demo" \
-        --username=liquibase_user \
-        --password=liquibase_pass \
-        --changelog-file=changelog_master.json validate
-
-    <span class="code-keyword"># Opción B: Colocar en carpeta lib/ de Liquibase</span>
-    $ cp postgresql-42.7.3.jar /ruta/a/liquibase/lib/
-
-    <span class="code-keyword"># Opción C: Agregar al classpath del sistema</span>
-    $ export CLASSPATH=$CLASSPATH:$(pwd)/postgresql-42.7.3.jar
-            </div>
-        </div>
-        
-        <div class="component-detail">
-            <div class="component-header">
-                <div class="component-icon"><i class="fas fa-vial"></i></div>
-                <div>
-                    <h4>PASO 5: Verificar Instalación Completa</h4>
-                    <p>Comprobar que todo funciona correctamente</p>
-                </div>
-            </div>
-            
-            <div class="code-example">
-    <span class="code-keyword"># 1. Verificar versión de Liquibase</span>
-    $ liquibase --version
-    <span class="code-keyword"># Debería mostrar: Liquibase Version: 4.x.x</span>
-
-    <span class="code-keyword"># 2. Probar conexión a PostgreSQL</span>
-    $ liquibase --url="jdbc:postgresql://localhost:5432/liquibase_demo" \
-        --username=liquibase_user \
-        --password=liquibase_pass \
-        --driver=org.postgresql.Driver \
-        --classpath=./postgresql-42.7.3.jar \
-        --output-file=test_connection.txt status
-
-    <span class="code-keyword"># 3. Verificar que el archivo se creó sin errores</span>
-    $ cat test_connection.txt
-
-    <span class="code-keyword"># 4. Probar con un changelog simple</span>
-    $ cat > test_changelog.json << 'EOF'
-    {
-    "databaseChangeLog": [
-        {
-        "changeSet": {
-            "id": "test-1",
-            "author": "test",
-            "changes": [
-            {
-                "sql": {
-                "sql": "SELECT current_timestamp;"
-                }
-            }
-            ]
-        }
-        }
-    ]
-    }
-    EOF
-
-    $ liquibase --url="jdbc:postgresql://localhost:5432/liquibase_demo" \
-        --username=liquibase_user \
-        --password=liquibase_pass \
-        --changelog-file=test_changelog.json \
-        --classpath=./postgresql-42.7.3.jar \
-        validate
-            </div>
-        </div>
-        
-        <div class="key-points" style="margin-top: 20px;">
-            <h4>🚨 SOLUCIÓN DE PROBLEMAS COMUNES</h4>
-            <ul>
-                <li><strong>"Class not found: org.postgresql.Driver"</strong> → El driver JDBC no está en el classpath</li>
-                <li><strong>"Connection refused"</strong> → PostgreSQL no está corriendo o el puerto es incorrecto</li>
-                <li><strong>"password authentication failed"</strong> → Credenciales incorrectas o usuario no existe</li>
-                <li><strong>"permission denied for schema public"</strong> → Usuario sin permisos suficientes</li>
-                <li><strong>"Invalid argument '--changelog-file'"</strong> → En Liquibase 4.x, debes especificar siempre este parámetro</li>
-            </ul>
-            
-            <div class="code-example" style="margin-top: 15px; background: #fff3cd;">
-    <span class="code-keyword"># Comandos de diagnóstico útiles:</span>
-
-    <span class="code-keyword"># Verificar que PostgreSQL está corriendo</span>
-    $ systemctl status postgresql
-    $ sudo lsof -i :5432
-
-    <span class="code-keyword"># Probar conexión con psql</span>
-    $ psql -h localhost -U liquibase_user -d liquibase_demo -W
-
-    <span class="code-keyword"># Ver logs de PostgreSQL</span>
-    $ sudo tail -f /var/log/postgresql/postgresql-14-main.log
-            </div>
-        </div>
-        
-        <div class="core-principle" style="margin-top: 20px;">
-            <h4><span class="principle-icon">✓</span> CONFIGURACIÓN LISTA PARA EL CURSO</h4>
-            <p>Con estos pasos completados, tienes un entorno funcional de Liquibase + PostgreSQL para seguir todas las lecciones del curso.</p>
-            <p><strong>Nota importante:</strong> En las lecciones usaremos <strong>Liquibase 4.x</strong> con la sintaxis actualizada donde <code>--changelog-file</code> es obligatorio en todos los comandos.</p>
-        </div>
-    </section>   
+    
    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
